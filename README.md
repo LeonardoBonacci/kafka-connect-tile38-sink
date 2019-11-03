@@ -1,45 +1,13 @@
-# Introduction
+Welcome to this Kafka Connect connector!
 
-Welcome to your new Kafka Connect connector!
+# Useful resources
 
-# Running in development
-
-
-The [docker-compose.yml](docker-compose.yml) that is included in this repository is based on the Confluent Platform Docker
-images. Take a look at the [quickstart](http://docs.confluent.io/current/cp-docker-images/docs/quickstart.html#getting-started-with-docker-client)
-for the Docker images. 
-
-Your development workstation needs to be able to resolve the hostnames that are listed in the `docker-compose.yml` 
-file in the root of this repository. If you are using [Docker for Mac](https://docs.docker.com/v17.12/docker-for-mac/install/)
-your containers will be available at the ip address `127.0.0.1`. If you are running docker-machine
-you will need to determine the ip address of the virtual machine with `docker-machine ip confluent`
-to determine the ip address.
-
-```
-127.0.0.1 zookeeper
-127.0.0.1 kafka
-127.0.0.1 schema-registry
-```
-
-
-```
-docker-compose up -d
-```
-
-
-The debug script assumes that `connect-standalone` is in the path on your local workstation. Download 
-the latest version of the [Kafka](https://www.confluent.io/download/) to get started.
-
-
-Start the connector with debugging enabled.
- 
-```
-./bin/debug.sh
-```
-
-Start the connector with debugging enabled. This will wait for a debugger to attach.
-
-```
-export SUSPEND='y'
-./bin/debug.sh
-```
+* https://github.com/jcustenborder/kafka-connect-archtype
+* https://docs.confluent.io/3.2.0/connect/managing.html#common-rest-examples
+* https://www.udemy.com/course/kafka-connect/
+* https://github.com/lensesio/fast-data-dev/#enable-additional-connectors
+* https://hackernoon.com/writing-your-own-sink-connector-for-your-kafka-stack-fa7a7bc201ea
+* https://github.com/skynyrd/kafka-connect-elastic-sink
+* https://tile38.com/
+* https://github.com/lettuce-io/lettuce-core/wiki/Custom-commands,-outputs-and-command-mechanics
+* https://tile38.com/topics/replication/
