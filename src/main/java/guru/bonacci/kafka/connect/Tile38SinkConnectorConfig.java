@@ -7,6 +7,8 @@ import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
 
+import guru.bonacci.kafka.connect.validators.ObjectTypeValidator;
+
 public class Tile38SinkConnectorConfig extends AbstractConfig {
 
 	public static final String TILE38_URL = "tile38.url";
@@ -34,8 +36,8 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 				.define(TILE38_URL, Type.STRING, Importance.HIGH, TILE38_URL_DOC)
 				.define(TILE38_PORT, Type.INT, Importance.HIGH, TILE38_PORT_DOC)
 				.define(KEY, Type.STRING, Importance.HIGH, KEY_DOC)
-				.define(OBJECT_TYPE, Type.STRING, Constants.POINT_LABEL, Importance.MEDIUM, OBJECT_TYPE_DOC)
-				.define(OPTIONAL_FIELD_NAME, Type.STRING, Importance.LOW, OPTIONAL_FIELD_NAME_DOC);
+				.define(OBJECT_TYPE, Type.STRING, Constants.POINT_LABEL, new ObjectTypeValidator(), Importance.MEDIUM, OBJECT_TYPE_DOC)
+				.define(OPTIONAL_FIELD_NAME, Type.STRING, null, Importance.LOW, OPTIONAL_FIELD_NAME_DOC);
 	}
 
 	public String getTile38Url() {

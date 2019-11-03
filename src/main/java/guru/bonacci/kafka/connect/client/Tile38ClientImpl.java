@@ -1,18 +1,20 @@
 package guru.bonacci.kafka.connect.client;
 
+import static guru.bonacci.kafka.connect.client.JsonReader.readDouble;
+import static guru.bonacci.kafka.connect.client.JsonReader.readString;
+
 import java.util.List;
-
+import org.apache.commons.lang3.StringUtils;
 import com.google.gson.JsonObject;
-import com.lambdaworks.redis.RedisClient;
-import com.lambdaworks.redis.api.StatefulRedisConnection;
-import com.lambdaworks.redis.api.sync.RedisCommands;
-import com.lambdaworks.redis.codec.StringCodec;
-import com.lambdaworks.redis.output.StatusOutput;
-import com.lambdaworks.redis.protocol.CommandArgs;
-import com.lambdaworks.redis.protocol.CommandType;
-
 import guru.bonacci.kafka.connect.Constants;
 import guru.bonacci.kafka.connect.Record;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.codec.StringCodec;
+import io.lettuce.core.output.StatusOutput;
+import io.lettuce.core.protocol.CommandArgs;
+import io.lettuce.core.protocol.CommandType;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,24 +38,27 @@ public class Tile38ClientImpl implements Tile38Client {
     public void send(List<Record> records, String key, String objectType, String optionalFieldName) {
     	for (Record record : records) {
             JsonObject json = record.getJson();
-            String id = JsonReader.readString(json, Constants.ID);
-            Double lat = JsonReader.readDouble(json, Constants.LATITUDE);
-            Double lon = JsonReader.readDouble(json, Constants.LONGITUDE);
-            //TODO add elevation
+            String id = readString(json, Constants.ID);
+            Double lat = readDouble(json, Constants.LATITUDE);
+            Double lon = readDouble(json, Constants.LONGITUDE);
+            //TODO add elevation: int?
             
-            //TODO make optional and support multiple fields 
-            Double f1 = JsonReader.readDouble(json, optionalFieldName);
+            CommandArgs<String, String> args = new CommandArgs<>(StringCodec.UTF8)
+					            .add(key) 
+					            .add(id);
 
-	        String resp = sync.dispatch(CommandType.SET,
-	                    new StatusOutput<>(StringCodec.UTF8), new CommandArgs<>(StringCodec.UTF8)
-	                            .add(key) 
-	                            .add(id)
-	                            .add(Constants.FIELD_LABEL) 
-	                            .add(optionalFieldName) 
-	                            .add(f1) 
-	                            .add(objectType) 
-	                            .add(lat) 
-	                            .add(lon));
+            if (StringUtils.isNotBlank(optionalFieldName)) {
+                //TODO support multiple fields 
+	            args.add(Constants.FIELD_LABEL)
+	            	.add(optionalFieldName) 
+	            	.add(readDouble(json, optionalFieldName)); 
+            }
+
+            args.add(objectType) 
+            	.add(lat) 
+				.add(lon);
+
+	        String resp = sync.dispatch(CommandType.SET, new StatusOutput<>(StringCodec.UTF8), args);
             log.info("tile38's response {}", resp);
         }
     }
