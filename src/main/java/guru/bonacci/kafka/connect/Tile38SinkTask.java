@@ -1,6 +1,5 @@
 package guru.bonacci.kafka.connect;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,14 +9,14 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 
-import guru.bonacci.kafka.connect.service.ElasticService;
-import guru.bonacci.kafka.connect.service.ElasticServiceImpl;
+import guru.bonacci.kafka.connect.service.Tile38Service;
+import guru.bonacci.kafka.connect.service.Tile38ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ElasticSinkTask extends SinkTask {
+public class Tile38SinkTask extends SinkTask {
 
-	private ElasticService elasticService;
+	private Tile38Service service;
 
 	@Override
 	public String version() {
@@ -26,7 +25,7 @@ public class ElasticSinkTask extends SinkTask {
 
 	@Override
 	public void start(Map<String, String> map) {
-		elasticService = new ElasticServiceImpl(null, new ElasticSinkConnectorConfig(map));
+		service = new Tile38ServiceImpl(null, new Tile38SinkConnectorConfig(map));
 	}
 
 	@Override
@@ -37,7 +36,7 @@ public class ElasticSinkTask extends SinkTask {
 					peek(r -> log.error("record" + r)).map(r -> String.valueOf(r.value()))
 					.peek(r -> log.error("record as string" + r)) 
 					.collect(Collectors.toList());
-			elasticService.process(recordsAsString);
+			service.process(recordsAsString);
 		} catch (Exception e) {
 			log.error("Error while processing records");
 			log.error(e.toString());
@@ -51,10 +50,6 @@ public class ElasticSinkTask extends SinkTask {
 
 	@Override
 	public void stop() {
-		try {
-			elasticService.closeClient();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		service.closeClient();
 	}
 }

@@ -11,7 +11,7 @@ import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkConnector;
 
-public class ElasticSinkConnector extends SinkConnector {
+public class Tile38SinkConnector extends SinkConnector {
 
 	private Map<String, String> configProperties;
 
@@ -25,15 +25,15 @@ public class ElasticSinkConnector extends SinkConnector {
 	public void start(Map<String, String> props) {
 		try {
 			configProperties = props;
-			new ElasticSinkConnectorConfig(props);
+			new Tile38SinkConnectorConfig(props);
 		} catch (ConfigException e) {
-			throw new ConnectException("Couldn't start ElasticsearchSinkConnector due to configuration error", e);
+			throw new ConnectException("Couldn't start Tile38SinkConnector due to configuration error", e);
 		}
 	}
 
 	@Override
 	public Class<? extends Task> taskClass() {
-		return ElasticSinkTask.class;
+		return Tile38SinkTask.class;
 	}
 
 	@Override
@@ -53,6 +53,6 @@ public class ElasticSinkConnector extends SinkConnector {
 
 	@Override
 	public ConfigDef config() {
-		return ElasticSinkConnectorConfig.conf();
+		return Tile38SinkConnectorConfig.conf();
 	}
 }

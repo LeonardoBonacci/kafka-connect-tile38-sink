@@ -1,13 +1,8 @@
 package guru.bonacci.kafka.connect.service;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-
-import org.apache.kafka.connect.json.JsonConverter;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -15,35 +10,34 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-import guru.bonacci.kafka.connect.ElasticSinkConnectorConfig;
 import guru.bonacci.kafka.connect.Record;
-import guru.bonacci.kafka.connect.client.ElasticClient;
-import guru.bonacci.kafka.connect.client.ElasticClientImpl;
+import guru.bonacci.kafka.connect.Tile38SinkConnectorConfig;
+import guru.bonacci.kafka.connect.client.Tile38Client;
+import guru.bonacci.kafka.connect.client.Tile38ClientImpl;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ElasticServiceImpl implements ElasticService {
+public class Tile38ServiceImpl implements Tile38Service {
 
 	private Gson gson;
     private String indexName;
-    private String typeName;
-    private ElasticClient elasticClient;
+    private Tile38Client client;
 
-    public ElasticServiceImpl(ElasticClient elasticClient, ElasticSinkConnectorConfig config) {
+    
+    public Tile38ServiceImpl(Tile38Client client, Tile38SinkConnectorConfig config) {
         indexName = config.getIndexName();
-        typeName = config.getTypeName();
 
         prepareJsonConverters();
 
-        if(elasticClient == null) {
+        if (client == null) {
             try {
-                elasticClient = new ElasticClientImpl(config.getElasticUrl(), config.getElasticPort());
-            } catch (UnknownHostException e) {
-                log.error("The host is unknown, exception stacktrace: " + e.toString());
+                client = new Tile38ClientImpl(config.getElasticUrl(), config.getElasticPort());
+            } catch (RuntimeException e) {
+                log.error("Could not connect to host, exception stacktrace: " + e.toString());
             }
         }
 
-        this.elasticClient = elasticClient;
+        this.client = client;
     }
 
     @Override
@@ -65,7 +59,7 @@ public class ElasticServiceImpl implements ElasticService {
         });
 
         try {
-            elasticClient.bulkSend(recordList, indexName, typeName);
+            client.send(recordList, indexName);
         }
         catch (Exception e) {
             log.error("Something failed, here is the error:");
@@ -74,14 +68,11 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     @Override
-    public void closeClient() throws IOException {
-        elasticClient.close();
+    public void closeClient() {
+        client.close();
     }
 
     private void prepareJsonConverters() {
-        JsonConverter converter = new JsonConverter();
-        converter.configure(Collections.singletonMap("schemas.enable", "false"), false);
-	
         gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")

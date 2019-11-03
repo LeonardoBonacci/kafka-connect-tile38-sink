@@ -7,7 +7,7 @@ import org.apache.kafka.common.config.ConfigDef.Importance;
 
 import java.util.Map;
 
-public class ElasticSinkConnectorConfig extends AbstractConfig {
+public class Tile38SinkConnectorConfig extends AbstractConfig {
 
 	public static final String TYPE_NAME = "type.name";
 	private static final String TYPE_NAME_DOC = "Type of the Elastic index you want to work on.";
@@ -18,11 +18,11 @@ public class ElasticSinkConnectorConfig extends AbstractConfig {
 	public static final String INDEX_NAME = "index.name";
 	private static final String INDEX_NAME_DOC = "Elastic index name as target.";
 
-	public ElasticSinkConnectorConfig(ConfigDef config, Map<String, String> parsedConfig) {
+	public Tile38SinkConnectorConfig(ConfigDef config, Map<String, String> parsedConfig) {
 		super(config, parsedConfig);
 	}
 
-	public ElasticSinkConnectorConfig(Map<String, String> parsedConfig) {
+	public Tile38SinkConnectorConfig(Map<String, String> parsedConfig) {
 		this(conf(), parsedConfig);
 	}
 

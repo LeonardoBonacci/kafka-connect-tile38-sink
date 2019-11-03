@@ -2,10 +2,11 @@ version: '3.5'
 
 services:
   kafka-cluster:
-    image: landoop/fast-data-dev:cp3.3.0
+    image: landoop/fast-data-dev:latest
     environment:
       ADV_HOST: host.docker.internal  # Change to 192.168.99.100 if using Docker Toolbox
       RUNTESTS: 0                     # Disable Running tests so the cluster starts faster
+      DISABLE: azure-documentdb,blockchain,bloomberg,cassandra,coap,druid,elastic,elastic5,ftp,hazelcast,hbase,influxdb,jms,kudu,mongodb,mqtt,redis,rethink,voltdb,yahoo,hdfs,jdbc,elasticsearch,s3,twitter
     ports:
       - 2181:2181                 # Zookeeper
       - 3030:3030                 # Landoop UI
@@ -13,17 +14,14 @@ services:
       - 9581-9585:9581-9585       # JMX Ports
       - 9092:9092                 # Kafka Broker
     volumes:
-      - C:/Users/Leo/git/kafka-connect-tile38-sink/target/kafka-connect-tile38-sink-1.0-SNAPSHOT-package/share/java/kafka-connect-tile38-sink:/connectors 
+      - C:/Users/Leo/git/kafka-connect-tile38-sink/target/kafka-connect-tile38-sink-1.0-SNAPSHOT-package/share/java/kafka-connect-tile38-sink:/connectors/Tile38
     links:
-      - elasticsearch
+      - tile38
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.3
-    environment:
-      - "xpack.security.enabled=false" 
+  tile38:
+    image: tile38/tile38
     ports:
-      - 9200:9200
-      - 9300:9300
+      - "9851:9851"
 
   source:
     image: leonardobonacci/train-source:1.0

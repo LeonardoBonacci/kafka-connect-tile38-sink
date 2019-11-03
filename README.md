@@ -11,3 +11,8 @@ Welcome to this Kafka Connect connector!
 * https://tile38.com/
 * https://github.com/lettuce-io/lettuce-core/wiki/Custom-commands,-outputs-and-command-mechanics
 * https://tile38.com/topics/replication/
+
+# Commands
+
+clear ; docker run --net=host -it tile38/tile38 tile38-cli
+> scan trains
