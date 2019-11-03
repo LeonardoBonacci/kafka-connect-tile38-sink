@@ -32,7 +32,7 @@ public class Tile38SinkTask extends SinkTask {
 	@Override
 	public void put(Collection<SinkRecord> collection) {
 		try {
-			log.debug("it's going well, another {} incoming ", collection.size());
+			log.info("Going well, another {} incoming ", collection.size());
 			Collection<String> recordsAsStrings = collection.stream().
 					map(r -> String.valueOf(r.value()))
 					.collect(Collectors.toList());

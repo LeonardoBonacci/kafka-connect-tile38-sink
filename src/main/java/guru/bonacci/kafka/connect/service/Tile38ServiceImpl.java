@@ -22,12 +22,13 @@ public class Tile38ServiceImpl implements Tile38Service {
 	private Gson gson;
     private String key;
     private String objectType;
+    private String optionalField;
     private Tile38Client client;
-
     
     public Tile38ServiceImpl(Tile38Client client, Tile38SinkConnectorConfig config) {
         key = config.getKey();
         objectType = config.getObjectType();
+        optionalField = config.getOptionalFieldName();
 
         prepareJsonConverters();
 
@@ -60,7 +61,7 @@ public class Tile38ServiceImpl implements Tile38Service {
         });
 
         try {
-            client.send(recordList, key, objectType);
+            client.send(recordList, key, objectType, optionalField);
         }
         catch (Exception e) {
             log.error("Something went wrong ", e);

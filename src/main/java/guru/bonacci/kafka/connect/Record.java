@@ -9,5 +9,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Record {
 
-	private final JsonObject data;
+	private final JsonObject json;
 }

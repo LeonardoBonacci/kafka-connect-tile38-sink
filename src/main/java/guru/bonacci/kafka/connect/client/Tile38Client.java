@@ -6,6 +6,6 @@ import guru.bonacci.kafka.connect.Record;
 
 public interface Tile38Client {
 
-	void send(List<Record> records, String key, String objectType);
+	void send(List<Record> records, String key, String objectType, String optionalField);
     void close();
 }

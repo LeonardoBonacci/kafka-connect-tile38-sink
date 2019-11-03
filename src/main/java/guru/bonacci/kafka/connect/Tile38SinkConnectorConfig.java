@@ -17,7 +17,10 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	private static final String KEY_DOC = "The key (name) of your record.";
 	public static final String OBJECT_TYPE = "object.type";
 	private static final String OBJECT_TYPE_DOC = "Type of the Tile38 record you want to work sink.";
+	public static final String OPTIONAL_FIELD_NAME = "optional.field.name";
+	private static final String OPTIONAL_FIELD_NAME_DOC = "Double precision floating point field to sink.";
 
+	
 	public Tile38SinkConnectorConfig(ConfigDef config, Map<String, String> parsedConfig) {
 		super(config, parsedConfig);
 	}
@@ -29,9 +32,10 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	public static ConfigDef conf() {
 		return new ConfigDef()
 				.define(TILE38_URL, Type.STRING, Importance.HIGH, TILE38_URL_DOC)
-				.define(KEY, Type.STRING, Importance.HIGH, KEY_DOC)
 				.define(TILE38_PORT, Type.INT, Importance.HIGH, TILE38_PORT_DOC)
-				.define(OBJECT_TYPE, Type.STRING, "FIELD", Importance.MEDIUM, OBJECT_TYPE_DOC);
+				.define(KEY, Type.STRING, Importance.HIGH, KEY_DOC)
+				.define(OBJECT_TYPE, Type.STRING, Constants.POINT_LABEL, Importance.MEDIUM, OBJECT_TYPE_DOC)
+				.define(OPTIONAL_FIELD_NAME, Type.STRING, Importance.LOW, OPTIONAL_FIELD_NAME_DOC);
 	}
 
 	public String getTile38Url() {
@@ -49,7 +53,8 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	public String getObjectType() {
 		return this.getString(OBJECT_TYPE);
 	}
-
-
-
+	
+	public String getOptionalFieldName() {
+		return this.getString(OPTIONAL_FIELD_NAME);
+	}
 }

@@ -33,21 +33,27 @@ public class Tile38ClientImpl implements Tile38Client {
 	 * geojson)|(POINT lat lon [z])|(BOUNDS minlat minlon maxlat maxlon)|(HASH
 	 * geohash)|(STRING value)
 	 */
-    public void send(List<Record> records, String key, String objectType) {
+    public void send(List<Record> records, String key, String objectType, String optionalFieldName) {
     	for (Record record : records) {
-            JsonObject dataAsObject = record.getData();
-            String id = dataAsObject.get(Constants.DATA_ID).getAsString();
+            JsonObject json = record.getJson();
+            String id = JsonReader.readString(json, Constants.ID);
+            Double lat = JsonReader.readDouble(json, Constants.LATITUDE);
+            Double lon = JsonReader.readDouble(json, Constants.LONGITUDE);
+            //TODO add elevation
             
+            //TODO make optional and support multiple fields 
+            Double f1 = JsonReader.readDouble(json, optionalFieldName);
+
 	        String resp = sync.dispatch(CommandType.SET,
 	                    new StatusOutput<>(StringCodec.UTF8), new CommandArgs<>(StringCodec.UTF8)
 	                            .add(key) 
 	                            .add(id)
-	                            .add("FIELD") // optional extra fields 
-	                            .add("route") // extra field name
-	                            .add(66) // extra field value - must be numeric
+	                            .add(Constants.FIELD_LABEL) 
+	                            .add(optionalFieldName) 
+	                            .add(f1) 
 	                            .add(objectType) 
-	                            .add(33.01) // lat 
-	                            .add(-115.03)); // lon
+	                            .add(lat) 
+	                            .add(lon));
             log.info("tile38's response {}", resp);
         }
     }

@@ -6,7 +6,7 @@ services:
     environment:
       ADV_HOST: host.docker.internal  # Change to 192.168.99.100 if using Docker Toolbox
       RUNTESTS: 0                     # Disable Running tests so the cluster starts faster
-      DISABLE: hive,pulsar,azure-documentdb,blockchain,bloomberg,cassandra,coap,druid,elastic,elastic5,ftp,hazelcast,hbase,influxdb,jms,kudu,mongodb,mqtt,redis,rethink,voltdb,yahoo,hdfs,jdbc,elasticsearch,s3,twitter
+      DISABLE: hive,pulsar,azure-documentdb,blockchain,bloomberg,cassandra,coap,druid,elastic,elastic5,elastic6,ftp,hazelcast,hbase,influxdb,jms,kudu,mongodb,mqtt,redis,rethink,voltdb,yahoo,hdfs,jdbc,elasticsearch,s3,twitter
     ports:
       - 2181:2181                 # Zookeeper
       - 3030:3030                 # Landoop UI
