@@ -1,22 +1,22 @@
 package guru.bonacci.kafka.connect;
 
+import java.util.Map;
+
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
-import org.apache.kafka.common.config.ConfigDef.Type;
 import org.apache.kafka.common.config.ConfigDef.Importance;
-
-import java.util.Map;
+import org.apache.kafka.common.config.ConfigDef.Type;
 
 public class Tile38SinkConnectorConfig extends AbstractConfig {
 
-	public static final String TYPE_NAME = "type.name";
-	private static final String TYPE_NAME_DOC = "Type of the Elastic index you want to work on.";
-	public static final String ELASTIC_URL = "elastic.url";
-	private static final String ELASTIC_URL_DOC = "Elastic URL to connect.";
-	public static final String ELASTIC_PORT = "elastic.port";
-	private static final String ELASTIC_PORT_DOC = "Elastic transport port to connect.";
-	public static final String INDEX_NAME = "index.name";
-	private static final String INDEX_NAME_DOC = "Elastic index name as target.";
+	public static final String TILE38_URL = "tile38.url";
+	private static final String TILE38_URL_DOC = "Tile38 URL to connect.";
+	public static final String TILE38_PORT = "tile38.port";
+	private static final String TILE38_PORT_DOC = "TILE38 port to connect.";
+	public static final String KEY = "key.name";
+	private static final String KEY_DOC = "The key (name) of your record.";
+	public static final String OBJECT_TYPE = "object.type";
+	private static final String OBJECT_TYPE_DOC = "Type of the Tile38 record you want to work sink.";
 
 	public Tile38SinkConnectorConfig(ConfigDef config, Map<String, String> parsedConfig) {
 		super(config, parsedConfig);
@@ -27,25 +27,29 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	}
 
 	public static ConfigDef conf() {
-		return new ConfigDef().define(TYPE_NAME, Type.STRING, Importance.HIGH, TYPE_NAME_DOC)
-				.define(ELASTIC_URL, Type.STRING, Importance.HIGH, ELASTIC_URL_DOC)
-				.define(INDEX_NAME, Type.STRING, Importance.HIGH, INDEX_NAME_DOC)
-				.define(ELASTIC_PORT, Type.INT, Importance.HIGH, ELASTIC_PORT_DOC);
+		return new ConfigDef()
+				.define(TILE38_URL, Type.STRING, Importance.HIGH, TILE38_URL_DOC)
+				.define(KEY, Type.STRING, Importance.HIGH, KEY_DOC)
+				.define(TILE38_PORT, Type.INT, Importance.HIGH, TILE38_PORT_DOC)
+				.define(OBJECT_TYPE, Type.STRING, "FIELD", Importance.MEDIUM, OBJECT_TYPE_DOC);
 	}
 
-	public String getTypeName() {
-		return this.getString(TYPE_NAME);
+	public String getTile38Url() {
+		return this.getString(TILE38_URL);
 	}
 
-	public String getIndexName() {
-		return this.getString(INDEX_NAME);
+	public Integer getTile38Port() {
+		return this.getInt(TILE38_PORT);
+	}
+	
+	public String getKey() {
+		return this.getString(KEY);
 	}
 
-	public String getElasticUrl() {
-		return this.getString(ELASTIC_URL);
+	public String getObjectType() {
+		return this.getString(OBJECT_TYPE);
 	}
 
-	public Integer getElasticPort() {
-		return this.getInt(ELASTIC_PORT);
-	}
+
+
 }

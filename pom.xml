@@ -44,9 +44,9 @@
             <version>2.8.0</version>
         </dependency>
 		<dependency>
-		  <groupId>io.lettuce</groupId>
-		  <artifactId>lettuce-core</artifactId>
-		  <version>5.2.1.RELEASE</version>
+			<groupId>biz.paluch.redis</groupId>
+			<artifactId>lettuce</artifactId>
+			<version>5.0.0.Beta1</version>
 		</dependency>        
         <dependency>
 			<groupId>org.projectlombok</groupId>

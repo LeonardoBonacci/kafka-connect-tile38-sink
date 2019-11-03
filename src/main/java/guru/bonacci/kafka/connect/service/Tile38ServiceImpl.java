@@ -20,20 +20,22 @@ import lombok.extern.slf4j.Slf4j;
 public class Tile38ServiceImpl implements Tile38Service {
 
 	private Gson gson;
-    private String indexName;
+    private String key;
+    private String objectType;
     private Tile38Client client;
 
     
     public Tile38ServiceImpl(Tile38Client client, Tile38SinkConnectorConfig config) {
-        indexName = config.getIndexName();
+        key = config.getKey();
+        objectType = config.getObjectType();
 
         prepareJsonConverters();
 
         if (client == null) {
             try {
-                client = new Tile38ClientImpl(config.getElasticUrl(), config.getElasticPort());
+                client = new Tile38ClientImpl(config.getTile38Url(), config.getTile38Port());
             } catch (RuntimeException e) {
-                log.error("Could not connect to host, exception stacktrace: " + e.toString());
+                log.error("Could not connect to host, exception stacktrace: {}", e.toString());
             }
         }
 
@@ -47,7 +49,6 @@ public class Tile38ServiceImpl implements Tile38Service {
         recordsAsString.forEach(recordStr -> {
             try {
                 JsonObject recordAsJson = gson.fromJson(recordStr, JsonObject.class);
-                log.info("another one " + recordAsJson);
                 recordList.add(new Record(recordAsJson));
             }
             catch (JsonSyntaxException e) {
@@ -59,11 +60,10 @@ public class Tile38ServiceImpl implements Tile38Service {
         });
 
         try {
-            client.send(recordList, indexName);
+            client.send(recordList, key, objectType);
         }
         catch (Exception e) {
-            log.error("Something failed, here is the error:");
-            log.error(e.toString());
+            log.error("Something went wrong ", e);
         }
     }
 

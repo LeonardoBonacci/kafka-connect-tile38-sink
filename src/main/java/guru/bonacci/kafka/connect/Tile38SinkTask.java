@@ -18,6 +18,7 @@ public class Tile38SinkTask extends SinkTask {
 
 	private Tile38Service service;
 
+	
 	@Override
 	public String version() {
 		return VersionUtil.getVersion();
@@ -31,12 +32,11 @@ public class Tile38SinkTask extends SinkTask {
 	@Override
 	public void put(Collection<SinkRecord> collection) {
 		try {
-			log.error("going well another " + collection.size());
-			Collection<String> recordsAsString = collection.stream().
-					peek(r -> log.error("record" + r)).map(r -> String.valueOf(r.value()))
-					.peek(r -> log.error("record as string" + r)) 
+			log.debug("it's going well, another {} incoming ", collection.size());
+			Collection<String> recordsAsStrings = collection.stream().
+					map(r -> String.valueOf(r.value()))
 					.collect(Collectors.toList());
-			service.process(recordsAsString);
+			service.process(recordsAsStrings);
 		} catch (Exception e) {
 			log.error("Error while processing records");
 			log.error(e.toString());
