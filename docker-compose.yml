@@ -14,7 +14,7 @@ services:
       - 9581-9585:9581-9585       # JMX Ports
       - 9092:9092                 # Kafka Broker
     volumes:
-      - C:/Users/Leo/git/kafka-connect-tile38-sink/target/kafka-connect-tile38-sink-1.0-SNAPSHOT-package/share/java/kafka-connect-tile38-sink:/connectors/Tile38
+      - ./target/kafka-connect-tile38-sink-1.0-SNAPSHOT-package/share/java/kafka-connect-tile38-sink:/connectors/Tile38
     links:
       - tile38
 

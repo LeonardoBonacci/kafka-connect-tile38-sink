@@ -1,4 +1,4 @@
-Welcome to this Kafka Connect connector!
+Welcome to yet another Kafka Connect connector!
 
 # Useful resources
 
@@ -12,7 +12,23 @@ Welcome to this Kafka Connect connector!
 * https://github.com/lettuce-io/lettuce-core/wiki/Custom-commands,-outputs-and-command-mechanics
 * https://tile38.com/topics/replication/
 
-# Commands
+# Warning
 
-clear ; docker run --net=host -it tile38/tile38 tile38-cli
-> scan trains
+The docker-compose file is made for a windows environment.
+You'll need to change kafka's ADV_HOST variable on other operating systems, and possibly alter the connector's volume mount.
+
+# Run
+
+* First build the project using 'mvn clean package'
+* Launch with 'docker-compose kafka-cluster tile38'
+* Wait a while, grab a coffee, and go to localhost:3030 and configure the connector with the settings supplied in Tile38SinkConnector.properties
+* This creates the connector and the kafka topic I_AM_HERE
+* In another console, run 'docker-compose up source'. This will pull a prepared docker image from the docker hub that generates test date. 
+* Yet another console: docker run --net=host -it tile38/tile38 tile38-cli
+* Run 'scan trains'
+* Nothing spectacular happening at first sight, now look better and see the coordinates changing while the (one) 'train moves' :)
+
+# Not working
+
+* When shit hits the fan, here's your savior: http://localhost:3030/logs/connect-distributed.log
+* Please let me know what needs fixing..
