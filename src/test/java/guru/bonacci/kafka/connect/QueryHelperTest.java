@@ -4,8 +4,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,7 +39,9 @@ public class QueryHelperTest {
 		nestedRecord.addProperty("ed", "fooed");
 		sinkRecord.add("nest", nestedRecord);
 
-		ImmutablePair<String, List<String>> q = new ImmutablePair<>(queryString, Arrays.asList(queryString.split(" ")));
+		ImmutablePair<String, Set<String>> q = new ImmutablePair<>(
+				queryString, 
+				new HashSet<String>(Arrays.asList(queryString.split(" "))));
 		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
 
 		String result = new QueryHelper(q, json).preparedStatement();
@@ -59,7 +62,9 @@ public class QueryHelperTest {
 		nestRecord.addProperty("ed", "fooed");
 		sinkRecord.add("nest", nestRecord);
 
-		ImmutablePair<String, List<String>> q = new ImmutablePair<>(queryString, Arrays.asList(queryString.split(" ")));
+		ImmutablePair<String, Set<String>> q = new ImmutablePair<>(
+				queryString, 
+				new HashSet<String>(Arrays.asList(queryString.split(" "))));
 		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
 
 		String result = new QueryHelper(q, json).generateCommand().toCommandString();

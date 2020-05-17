@@ -3,9 +3,12 @@ package guru.bonacci.kafka.connect;
 import static java.util.Arrays.asList;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.google.gson.Gson;
@@ -24,15 +27,16 @@ public class Tile38Client {
 	private final RedisClient client;
 	private final RedisCommands<String, String> sync;
 	private final Gson gson;
-	private final ImmutablePair<String, List<String>> query;
+	private final ImmutablePair<String, Set<String>> query;
 	
 	
 	public Tile38Client(String url, int port, String queryString) {
 		this.client = RedisClient.create(String.format("redis://%s:%d", url, port));
 		this.sync = client.connect().sync();
 
-		final List<String> queryTerms = asList(queryString.split(" "));
-		this.query = new ImmutablePair<>(queryString, queryTerms);
+	    final Set<String> targetSet = new HashSet<>();
+		CollectionUtils.addAll(targetSet, queryString.split(" "));
+		this.query = new ImmutablePair<>(queryString, targetSet);
 
 		this.gson = new Gson();
 	}

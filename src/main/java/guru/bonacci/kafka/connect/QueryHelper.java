@@ -1,14 +1,14 @@
 package guru.bonacci.kafka.connect;
 
+import static guru.bonacci.kafka.connect.StringBuilderUtils.replaceAll;
 import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class QueryHelper {
 
 	// query string with query terms
-	private final ImmutablePair<String, List<String>> query;
+	private final ImmutablePair<String, Set<String>> query;
 	private final Map<String, String> json;
 
 	
@@ -56,9 +56,4 @@ public class QueryHelper {
 
 		return result.toString();
 	}
-
-	// builder for better performance
-	private static StringBuilder replaceAll(StringBuilder sb, String find, String replace){
-        return new StringBuilder(Pattern.compile(find).matcher(sb).replaceAll(replace));
-    }
 }
