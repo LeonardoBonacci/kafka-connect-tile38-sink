@@ -1,9 +1,9 @@
 package guru.bonacci.kafka.connect;
 
-import static java.util.Arrays.asList;
 import static io.lettuce.core.codec.StringCodec.UTF8;
-import static java.util.stream.Collectors.toMap;
+import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -12,9 +12,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.PropertyUtils;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import io.lettuce.core.protocol.CommandArgs;
 import lombok.AllArgsConstructor;
@@ -24,9 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class QueryHelper {
 
-	private final String query;
-	private final List<String> queryTerms;
-	private final JsonObject json;
+	// query string with query terms
+	private final ImmutablePair<String, List<String>> query;
+	private final Map<String, String> json;
 
 	
 	public CommandArgs<String, String> generateCommand() {
@@ -38,15 +36,12 @@ public class QueryHelper {
 	}
 
 	// default for testing
-	@SuppressWarnings("unchecked")
 	String preparedStatement() {
-		Stream<String> events = queryTerms.stream().filter(s -> s.startsWith(Constants.TOKERATOR));
-		Map<String, String> map = new Gson().fromJson(json.toString(), Map.class);
-
+		Stream<String> events = query.right.stream().filter(s -> s.startsWith(Constants.TOKERATOR));
 		Map<String, String> parsed = events.collect(toMap(identity(), ev -> {
 			try {
 				String prop = ev.replace(Constants.TOKERATOR, "");
-				Object val = PropertyUtils.getProperty(map, prop);
+				Object val = PropertyUtils.getProperty(json, prop);
 				return val != null ? String.valueOf(val) : ev;
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				// ignore mismatch
@@ -54,7 +49,7 @@ public class QueryHelper {
 			}
 		}));
 
-		StringBuilder result = new StringBuilder(query);
+		StringBuilder result = new StringBuilder(query.left);
 		for (Map.Entry<String, String> entry : parsed.entrySet()) {
 			result = replaceAll(result, entry.getKey(), entry.getValue());
 		}
@@ -62,7 +57,7 @@ public class QueryHelper {
 		return result.toString();
 	}
 
-	// for performance
+	// builder for better performance
 	private static StringBuilder replaceAll(StringBuilder sb, String find, String replace){
         return new StringBuilder(Pattern.compile(find).matcher(sb).replaceAll(replace));
     }
