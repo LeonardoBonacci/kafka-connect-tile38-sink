@@ -1,6 +1,8 @@
 package guru.bonacci.kafka.connect;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -27,9 +29,10 @@ public class Tile38Client {
 	}
 
 	public void write(Collection<Record> events) {
+		List<String> terms = Arrays.asList(q.split(" "));
 		for (Record record : events) {
-			CommandArgs<String, String> args = new QueryHelper(q, record.getJson()).generateCommand();
-			String resp = sync.dispatch(CommandType.SET, new StatusOutput<>(StringCodec.UTF8), args);
+			CommandArgs<String, String> cmd = new QueryHelper(q, terms, record.getJson()).generateCommand();
+			String resp = sync.dispatch(CommandType.SET, new StatusOutput<>(StringCodec.UTF8), cmd);
 			log.info("tile38 answers {}", resp);
 		}
 	}

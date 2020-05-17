@@ -3,6 +3,8 @@ package guru.bonacci.kafka.connect;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +33,7 @@ public class QueryHelperTest {
 		nestRecord.addProperty("ed", "fooed");
 		sinkRecord.add("nest", nestRecord);
 
-		String q = new QueryHelper(query, sinkRecord).prepareStatement();
+		String q = new QueryHelper(query, Arrays.asList(query.split(" ")), sinkRecord).preparedStatement();
 	    assertThat(q, is("fooid is to be sub foosub and foofoo fooed"));
 	}
 
@@ -48,7 +50,7 @@ public class QueryHelperTest {
 		nestRecord.addProperty("ed", "fooed");
 		sinkRecord.add("nest", nestRecord);
 
-		String q = new QueryHelper(query, sinkRecord).generateCommand().toCommandString();
+		String q = new QueryHelper(query, Arrays.asList(query.split(" ")), sinkRecord).generateCommand().toCommandString();
 	    assertThat(q, is("fooid is to be sub foosub and foofoo fooed"));
 	}
 

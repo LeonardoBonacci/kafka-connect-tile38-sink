@@ -1,10 +1,14 @@
 package guru.bonacci.kafka.connect;
 
+import static java.util.Arrays.asList;
+import static io.lettuce.core.codec.StringCodec.UTF8;
+import static java.util.stream.Collectors.toMap;
+import static java.util.function.Function.identity;
+
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -12,7 +16,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.protocol.CommandArgs;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,22 +25,25 @@ import lombok.extern.slf4j.Slf4j;
 public class QueryHelper {
 
 	private final String query;
+	private final List<String> queryTerms;
 	private final JsonObject json;
 
+	
 	public CommandArgs<String, String> generateCommand() {
-		CommandArgs<String, String> args = new CommandArgs<>(StringCodec.UTF8);
-		Arrays.asList(prepareStatement().split(" ")).forEach(args::add);
-	    log.info("dont exec: " + args.toCommandString());
-	    return args;
+		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
+		asList(preparedStatement().split(" ")).forEach(cmd::add);
+		
+		log.debug(cmd.toCommandString());
+	    return cmd;
 	}
 
 	// default for testing
 	@SuppressWarnings("unchecked")
-	String prepareStatement() {
-		Stream<String> events = Arrays.asList(query.split(" ")).stream().filter(s -> s.startsWith(Constants.TOKERATOR));
+	String preparedStatement() {
+		Stream<String> events = queryTerms.stream().filter(s -> s.startsWith(Constants.TOKERATOR));
 		Map<String, String> map = new Gson().fromJson(json.toString(), Map.class);
 
-		Map<String, String> parsed = events.collect(Collectors.toMap(Function.identity(), ev -> {
+		Map<String, String> parsed = events.collect(toMap(identity(), ev -> {
 			try {
 				String prop = ev.replace(Constants.TOKERATOR, "");
 				Object val = PropertyUtils.getProperty(map, prop);
@@ -48,14 +54,16 @@ public class QueryHelper {
 			}
 		}));
 
-		String result = query;
+		StringBuilder result = new StringBuilder(query);
 		for (Map.Entry<String, String> entry : parsed.entrySet()) {
-			result = result.replaceAll(entry.getKey(), entry.getValue());
+			result = replaceAll(result, entry.getKey(), entry.getValue());
 		}
 
-		System.out.println(result);
-		return result;
+		return result.toString();
 	}
 
-
+	// for performance
+	private static StringBuilder replaceAll(StringBuilder sb, String find, String replace){
+        return new StringBuilder(Pattern.compile(find).matcher(sb).replaceAll(replace));
+    }
 }
