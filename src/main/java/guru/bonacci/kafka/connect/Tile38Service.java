@@ -50,7 +50,7 @@ public class Tile38Service {
         });
 
         try {
-            client.send(recordList);
+            client.write(recordList);
         }
         catch (Exception e) {
             log.error("Something went wrong ", e);
