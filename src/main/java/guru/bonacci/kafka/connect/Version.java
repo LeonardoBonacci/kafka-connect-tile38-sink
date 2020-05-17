@@ -1,11 +1,11 @@
 package guru.bonacci.kafka.connect;
 
-class VersionUtil {
+class Version {
 
 	
 	public static String getVersion() {
 		try {
-			return VersionUtil.class.getPackage().getImplementationVersion();
+			return Version.class.getPackage().getImplementationVersion();
 		} catch (Exception ex) {
 			return "0.0.0.0";
 		}

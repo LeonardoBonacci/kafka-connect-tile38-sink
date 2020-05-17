@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.client;
+package guru.bonacci.kafka.connect;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

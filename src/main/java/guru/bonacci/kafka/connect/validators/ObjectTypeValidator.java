@@ -10,10 +10,8 @@ public class ObjectTypeValidator implements ConfigDef.Validator {
 	@Override
 	public void ensureValid(String name, Object value) {
 		String objectType = (String) value;
-		// TODO also support multipoint, linestring, multilinestring, polygon,
-		// multipolygon, geometrycollection, feature, and featurecollection
-		if (!Constants.POINT_LABEL.equals(objectType)) {
-			throw new ConfigException(name, value, "Object type " + objectType + " not supported");
-		}
+//		if (!Constants.POINT_LABEL.equals(objectType)) {
+//			throw new ConfigException(name, value, "Object type " + objectType + " not supported");
+//		}
 	}
 }

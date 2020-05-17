@@ -19,6 +19,8 @@ public class Tester {
 	private static final String TOKERATOR = TOKEN + SEPARATOR;
 	
 	public static void main(String[] args) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		String.valueOf(null);
+		
 		String query = "event.id is to be sub event.sub and event.foo event.nest.ed";
 
 		Stream<String> events = Arrays.asList(query.split(" ")).stream().filter(s -> s.startsWith(TOKERATOR));

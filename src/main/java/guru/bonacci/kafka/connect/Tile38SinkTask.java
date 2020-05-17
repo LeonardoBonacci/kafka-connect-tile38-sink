@@ -9,8 +9,6 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 
-import guru.bonacci.kafka.connect.service.Tile38Service;
-import guru.bonacci.kafka.connect.service.Tile38ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -21,12 +19,12 @@ public class Tile38SinkTask extends SinkTask {
 	
 	@Override
 	public String version() {
-		return VersionUtil.getVersion();
+		return Version.getVersion();
 	}
 
 	@Override
 	public void start(Map<String, String> map) {
-		service = new Tile38ServiceImpl(null, new Tile38SinkConnectorConfig(map));
+		service = new Tile38Service(null, new Tile38SinkConnectorConfig(map));
 	}
 
 	@Override

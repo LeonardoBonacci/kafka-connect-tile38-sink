@@ -1,0 +1,59 @@
+{
+  "namespace": "demo",
+  "name": "fleet",
+  "type": "record",
+  "fields": [
+    {
+      "name": "id",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "options": [
+            "Gold",
+            "Silver",
+            "Platinum"
+          ]
+        }
+      }
+    },
+    {
+      "name": "route",
+      "type": {
+        "type": "long",
+        "arg.properties": {
+          "options": [
+            40,
+            66,
+            12
+          ]
+        }
+      }
+    },
+    {
+      "name": "lat",
+      "type": {
+        "type": "double",
+        "arg.properties": {
+          "options": [
+            12.34,
+            66.8,
+            12.11
+          ]
+        }
+      }
+    },
+    {
+      "name": "lon",
+      "type": {
+        "type": "double",
+        "arg.properties": {
+          "options": [
+            12.34,
+            66.8,
+            12.11
+          ]
+        }
+      }
+    }
+  ]
+}

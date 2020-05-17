@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.service;
+package guru.bonacci.kafka.connect;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,40 +10,29 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-import guru.bonacci.kafka.connect.Record;
-import guru.bonacci.kafka.connect.Tile38SinkConnectorConfig;
-import guru.bonacci.kafka.connect.client.Tile38Client;
-import guru.bonacci.kafka.connect.client.Tile38ClientImpl;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Tile38ServiceImpl implements Tile38Service {
+public class Tile38Service {
 
 	private Gson gson;
-    private String key;
-    private String objectType;
-    private String optionalField;
     private Tile38Client client;
     
-    public Tile38ServiceImpl(Tile38Client client, Tile38SinkConnectorConfig config) {
-        key = config.getKey();
-        objectType = config.getObjectType();
-        optionalField = config.getOptionalFieldName();
+    public Tile38Service(Tile38Client client, Tile38SinkConnectorConfig config) {
 
         prepareJsonConverters();
 
         if (client == null) {
             try {
-                client = new Tile38ClientImpl(config.getTile38Url(), config.getTile38Port());
+                client = new Tile38Client(config.getTile38Url(), config.getTile38Port(), config.getKey());
             } catch (RuntimeException e) {
-                log.error("Could not connect to host, exception stacktrace: {}", e.toString());
+                log.error("Could not connect to host, why? {}", e.toString());
             }
         }
 
         this.client = client;
     }
 
-    @Override
     public void process(Collection<String> recordsAsString){
         List<Record> recordList = new ArrayList<>();
 
@@ -61,14 +50,13 @@ public class Tile38ServiceImpl implements Tile38Service {
         });
 
         try {
-            client.send(recordList, key, objectType, optionalField);
+            client.send(recordList);
         }
         catch (Exception e) {
             log.error("Something went wrong ", e);
         }
     }
 
-    @Override
     public void closeClient() {
         client.close();
     }
