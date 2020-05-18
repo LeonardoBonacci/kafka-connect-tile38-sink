@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.utils;
 
 import java.util.regex.Pattern;
 

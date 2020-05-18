@@ -1,6 +1,6 @@
 package guru.bonacci.kafka.connect;
 
-import static guru.bonacci.kafka.connect.StringBuilderUtils.replaceAll;
+import static guru.bonacci.kafka.connect.utils.StringBuilderUtils.replaceAll;
 import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
@@ -15,32 +15,39 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import io.lettuce.core.protocol.CommandArgs;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@AllArgsConstructor
-public class QueryHelper {
+public class CommandGenerator {
 
-	// query string with query terms
-	private final ImmutablePair<String, Set<String>> query;
-	private final Map<String, String> json;
+	private static final String TOKEN = "event";
+	private static final String SEPARATOR = ".";
+	public static final String TOKERATOR = TOKEN + SEPARATOR;
+	
+	
+	// command string with terms
+	private final ImmutablePair<String, Set<String>> command;
 
 	
-	public CommandArgs<String, String> generateCommand() {
+	public CommandGenerator(ImmutablePair<String, Set<String>> command) {
+		this.command = command;
+		this.command.right.removeIf(s -> !s.startsWith(TOKERATOR));
+	}
+	
+	public CommandArgs<String, String> generate(Map<String, String> json) {
 		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
-		asList(preparedStatement().split(" ")).forEach(cmd::add);
+		asList(preparedStatement(json).split(" ")).forEach(cmd::add);
 		
 		log.debug(cmd.toCommandString());
 	    return cmd;
 	}
 
-	// default for testing
-	String preparedStatement() {
-		Stream<String> events = query.right.stream().filter(s -> s.startsWith(Constants.TOKERATOR));
+	// visible for testing
+	String preparedStatement(Map<String, String> json) {
+		Stream<String> events = command.right.stream();
 		Map<String, String> parsed = events.collect(toMap(identity(), ev -> {
 			try {
-				String prop = ev.replace(Constants.TOKERATOR, "");
+				String prop = ev.replace(TOKERATOR, "");
 				Object val = PropertyUtils.getProperty(json, prop);
 				return val != null ? String.valueOf(val) : ev;
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -49,7 +56,7 @@ public class QueryHelper {
 			}
 		}));
 
-		StringBuilder result = new StringBuilder(query.left);
+		StringBuilder result = new StringBuilder(command.left);
 		for (Map.Entry<String, String> entry : parsed.entrySet()) {
 			result = replaceAll(result, entry.getKey(), entry.getValue());
 		}

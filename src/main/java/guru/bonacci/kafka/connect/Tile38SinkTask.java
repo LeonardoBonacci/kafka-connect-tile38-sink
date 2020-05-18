@@ -1,8 +1,8 @@
 package guru.bonacci.kafka.connect;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
@@ -14,40 +14,54 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Tile38SinkTask extends SinkTask {
 
+	private Tile38SinkConnectorConfig config;
 	private Tile38Service service;
 
-	
 	@Override
 	public String version() {
 		return Version.getVersion();
 	}
 
 	@Override
-	public void start(Map<String, String> map) {
-		service = new Tile38Service(null, new Tile38SinkConnectorConfig(map));
+	public void start(Map<String, String> props) {
+		log.info("Starting Tile38SinkTask");
+
+		this.config = new Tile38SinkConnectorConfig(props);
+		this.service = new Tile38Service(config);
 	}
 
 	@Override
-	public void put(Collection<SinkRecord> collection) {
-		try {
-			log.info("Going well, another {} incoming ", collection.size());
-			Collection<String> recordsAsStrings = collection.stream().
-					map(r -> String.valueOf(r.value()))
-					.collect(Collectors.toList());
-			service.process(recordsAsStrings);
-		} catch (Exception e) {
-			log.error("Error while processing records");
-			log.error(e.toString());
+	public void put(Collection<SinkRecord> records) {
+		log.debug("Putting {} records to Tile38", records.size());
+
+		if (records.isEmpty()) {
+			return;
 		}
+
+		List<InternalSinkRecord> data = new EventBuilder()
+				.withTopic("foo") // config.topics)
+				.withSinkRecords(records)
+				.build();
+
+		service.write(data);
 	}
 
 	@Override
-	public void flush(Map<TopicPartition, OffsetAndMetadata> map) {
-		log.trace("Flushing the queue");
+	public void flush(Map<TopicPartition, OffsetAndMetadata> offsets) {
+		log.debug("Flushing data to Tile38 with the following offsets: {}", offsets);
+	}
+
+	@Override
+	public void close(Collection<TopicPartition> partitions) {
+		log.debug("Closing the task for topic partitions: {}", partitions);
 	}
 
 	@Override
 	public void stop() {
-		service.closeClient();
+		log.info("Stopping Tile38SinkTask");
+		
+		if (service != null) {
+			service.close();
+		}
 	}
 }

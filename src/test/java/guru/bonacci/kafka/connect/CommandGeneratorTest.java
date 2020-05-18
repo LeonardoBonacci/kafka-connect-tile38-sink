@@ -18,7 +18,7 @@ import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class QueryHelperTest {
+public class CommandGeneratorTest {
 
 	@BeforeAll
 	static void setup() {
@@ -28,7 +28,7 @@ public class QueryHelperTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	void preparedStatement() {
-		final String queryString = "event.id is to be sub event.sub and event.foo event.nest.ed";
+		final String cmdString = "event.id is to be sub event.sub and event.foo event.nest.ed";
 
 		JsonObject sinkRecord = new JsonObject();
 		sinkRecord.addProperty("id", "fooid");
@@ -40,18 +40,18 @@ public class QueryHelperTest {
 		sinkRecord.add("nest", nestedRecord);
 
 		ImmutablePair<String, Set<String>> q = new ImmutablePair<>(
-				queryString, 
-				new HashSet<String>(Arrays.asList(queryString.split(" "))));
+				cmdString, 
+				new HashSet<String>(Arrays.asList(cmdString.split(" "))));
 		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
 
-		String result = new QueryHelper(q, json).preparedStatement();
+		String result = new CommandGenerator(q).preparedStatement(json);
 	    assertThat(result, is("fooid is to be sub foosub and foofoo fooed"));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	void commandArgs() {
-		final String queryString = "event.id is to be sub event.sub and event.foo event.nest.ed";
+		final String cmdString = "event.id is to be sub event.sub and event.foo event.nest.ed";
 
 		JsonObject sinkRecord = new JsonObject();
 		sinkRecord.addProperty("id", "fooid");
@@ -63,11 +63,11 @@ public class QueryHelperTest {
 		sinkRecord.add("nest", nestRecord);
 
 		ImmutablePair<String, Set<String>> q = new ImmutablePair<>(
-				queryString, 
-				new HashSet<String>(Arrays.asList(queryString.split(" "))));
+				cmdString, 
+				new HashSet<String>(Arrays.asList(cmdString.split(" "))));
 		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
 
-		String result = new QueryHelper(q, json).generateCommand().toCommandString();
+		String result = new CommandGenerator(q).generate(json).toCommandString();
 	    assertThat(result, is("fooid is to be sub foosub and foofoo fooed"));
 	}
 

@@ -15,7 +15,6 @@ public class Tile38SinkConnector extends SinkConnector {
 
 	private Map<String, String> configProperties;
 
-	
 	@Override
 	public String version() {
 		return Version.getVersion();
@@ -48,7 +47,7 @@ public class Tile38SinkConnector extends SinkConnector {
 	}
 
 	@Override
-	public void stop() {
+	public void stop() throws ConnectException {
 	}
 
 	@Override
