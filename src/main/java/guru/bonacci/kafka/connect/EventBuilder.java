@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 
 import org.apache.kafka.connect.sink.SinkRecord;
 
-import guru.bonacci.kafka.connect.utils.ConverterFunctions;
-
 public class EventBuilder {
 
 	@SuppressWarnings("unused")
@@ -27,7 +25,7 @@ public class EventBuilder {
 
     List<InternalSinkRecord> build() { 
         return this.sinkRecords.stream()
-                .map(ConverterFunctions::InternalSinkRecord)
+                .map(DataConverter::toInternalSinkRecord)
                 .collect(Collectors.toList());
     }
 
