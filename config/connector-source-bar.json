@@ -1,0 +1,20 @@
+{
+  "name": "datagen-bar",
+  "config": {
+    "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
+    "kafka.topic": "bar",
+
+    "schema.filename": "/tmp/fleet.avro",
+    "schema.keyfield": "id",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+
+    "producer.interceptor.classes": "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor",
+    "max.interval": 5000,
+    "iterations": 1000000,
+
+    "tasks.max": "1"
+  }
+}

@@ -38,12 +38,12 @@ public class Tile38SinkTask extends SinkTask {
 			return;
 		}
 
-		List<InternalSinkRecord> data = new EventBuilder()
-				.withTopic("foo") // config.topics)
+		Map<String, List<InternalSinkRecord>> data = new EventBuilder()
+				.withTopics(config.topics.allTopics())
 				.withSinkRecords(records)
 				.build();
 
-		service.write(data);
+		service.writeData(data);
 	}
 
 	@Override

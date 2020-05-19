@@ -67,7 +67,7 @@ public class CommandGeneratorTest {
 				new HashSet<String>(Arrays.asList(cmdString.split(" "))));
 		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
 
-		String result = new CommandGenerator(q).generate(json).toCommandString();
+		String result = new CommandGenerator(q).compile(json).toCommandString();
 	    assertThat(result, is("fooid is to be sub foosub and foofoo fooed"));
 	}
 

@@ -1,6 +1,5 @@
 package guru.bonacci.kafka.connect;
 
-import static guru.bonacci.kafka.connect.utils.StringBuilderUtils.replaceAll;
 import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
@@ -34,7 +33,7 @@ public class CommandGenerator {
 		this.command.right.removeIf(s -> !s.startsWith(TOKERATOR));
 	}
 	
-	public CommandArgs<String, String> generate(Map<String, String> json) {
+	public CommandArgs<String, String> compile(Map<String, String> json) {
 		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
 		asList(preparedStatement(json).split(" ")).forEach(cmd::add);
 		
@@ -56,11 +55,11 @@ public class CommandGenerator {
 			}
 		}));
 
-		StringBuilder result = new StringBuilder(command.left);
+		String result = command.left;
 		for (Map.Entry<String, String> entry : parsed.entrySet()) {
-			result = replaceAll(result, entry.getKey(), entry.getValue());
+			result = result.replaceAll(entry.getKey(), entry.getValue());
 		}
 
-		return result.toString();
+		return result;
 	}
 }

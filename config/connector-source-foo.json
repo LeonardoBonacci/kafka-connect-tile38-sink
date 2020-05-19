@@ -1,8 +1,8 @@
 {
-  "name": "datagen-fleet",
+  "name": "datagen-foo",
   "config": {
     "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
-    "kafka.topic": "fleet",
+    "kafka.topic": "foo",
 
     "schema.filename": "/tmp/fleet.avro",
     "schema.keyfield": "id",
