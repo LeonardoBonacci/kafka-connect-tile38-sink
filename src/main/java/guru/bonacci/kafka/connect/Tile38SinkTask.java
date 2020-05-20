@@ -17,6 +17,7 @@ public class Tile38SinkTask extends SinkTask {
 	private Tile38SinkConnectorConfig config;
 	private Tile38Service service;
 
+	
 	@Override
 	public String version() {
 		return Version.getVersion();
@@ -39,7 +40,7 @@ public class Tile38SinkTask extends SinkTask {
 		}
 
 		Map<String, List<InternalSinkRecord>> data = new EventBuilder()
-				.withTopics(config.topics.allTopics())
+				.withTopics(config.topics.configuredTopics())
 				.withSinkRecords(records)
 				.build();
 

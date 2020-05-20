@@ -7,9 +7,8 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class InternalSinkRecord {
+class InternalSinkRecord {
 
-	//TODO object for nesting?
-	//private Map<String, String> key;
+	//TODO Object for nesting?
 	private final Map<String, String> value;
 }

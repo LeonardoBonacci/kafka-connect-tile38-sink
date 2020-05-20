@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,10 +21,14 @@ public class TopicsTest {
 			    "tile38.topic.foo", "foo query here",
 		    	"tile38.topic.bar", "bar query here"));
 
-		Map<String, String> result = Topics.filterByPrefix(config);
-	    assertThat(result.size(), is(2));
-	    assertThat(result.get("foo"), is("foo query here"));
-	    assertThat(result.get("bar"), is("bar query here"));
+		Topics topics = Topics.from(config);
+		Set<String> configuredTopics = topics.configuredTopics();
+	    assertThat(configuredTopics.size(), is(2));
+
+	    Map<String, String> cmds = topics.getCmdsByTopic();
+	    assertThat(cmds.size(), is(2));
+	    assertThat(cmds.get("foo"), is("foo query here"));
+	    assertThat(cmds.get("bar"), is("bar query here"));
 	}
 
 }

@@ -1,7 +1,8 @@
 package guru.bonacci.kafka.connect;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import static java.util.Collections.singletonMap;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.util.Map;
 
 import org.apache.kafka.connect.data.Schema;
@@ -17,10 +18,10 @@ public class DataConverter {
 
 	static {
 		JSON_CONVERTER = new JsonConverter();
-		JSON_CONVERTER.configure(Collections.singletonMap("schemas.enable", "false"), false);
+		JSON_CONVERTER.configure(singletonMap("schemas.enable", "false"), false);
 	}
 
-	public static InternalSinkRecord toInternalSinkRecord(SinkRecord sinkRecord) {
+	static InternalSinkRecord toInternalSinkRecord(SinkRecord sinkRecord) {
 		return new InternalSinkRecord(convertData(sinkRecord));
 	}
 
@@ -39,6 +40,6 @@ public class DataConverter {
 		Object value = record.value();
 
 		byte[] rawJsonPayload = JSON_CONVERTER.fromConnectData(record.topic(), schema, value);
-		return new String(rawJsonPayload, StandardCharsets.UTF_8);
+		return new String(rawJsonPayload, UTF_8);
 	}
 }

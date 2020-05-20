@@ -1,5 +1,6 @@
 package guru.bonacci.kafka.connect;
 
+import static guru.bonacci.kafka.connect.Constants.TOKERATOR;
 import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
@@ -19,21 +20,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommandGenerator {
 
-	private static final String TOKEN = "event";
-	private static final String SEPARATOR = ".";
-	public static final String TOKERATOR = TOKEN + SEPARATOR;
-	
-	
 	// command string with terms
-	private final ImmutablePair<String, Set<String>> command;
+	private final ImmutablePair<String, Set<String>> cmd;
 
 	
-	public CommandGenerator(ImmutablePair<String, Set<String>> command) {
-		this.command = command;
-		this.command.right.removeIf(s -> !s.startsWith(TOKERATOR));
+	private CommandGenerator(ImmutablePair<String, Set<String>> cmd) {
+		this.cmd = cmd;
+		this.cmd.right.removeIf(s -> !s.startsWith(TOKERATOR));
 	}
 	
-	public CommandArgs<String, String> compile(Map<String, String> json) {
+	CommandArgs<String, String> compile(Map<String, String> json) {
 		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
 		asList(preparedStatement(json).split(" ")).forEach(cmd::add);
 		
@@ -43,7 +39,7 @@ public class CommandGenerator {
 
 	// visible for testing
 	String preparedStatement(Map<String, String> json) {
-		Stream<String> events = command.right.stream();
+		Stream<String> events = cmd.right.stream();
 		Map<String, String> parsed = events.collect(toMap(identity(), ev -> {
 			try {
 				String prop = ev.replace(TOKERATOR, "");
@@ -55,11 +51,16 @@ public class CommandGenerator {
 			}
 		}));
 
-		String result = command.left;
+		String result = cmd.left;
 		for (Map.Entry<String, String> entry : parsed.entrySet()) {
 			result = result.replaceAll(entry.getKey(), entry.getValue());
 		}
 
 		return result;
 	}
+	
+	static CommandGenerator from(ImmutablePair<String, Set<String>> cmd) {
+		return new CommandGenerator(cmd);
+	}
+
 }

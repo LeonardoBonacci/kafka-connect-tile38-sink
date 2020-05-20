@@ -2,6 +2,7 @@ package guru.bonacci.kafka.connect;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static com.google.common.collect.Maps.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,12 +11,10 @@ import java.util.Set;
 
 import org.apache.kafka.connect.sink.SinkRecord;
 
-import com.google.common.collect.Maps;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class EventBuilder {
+class EventBuilder {
 
 	private Set<String> topics;
 	private Collection<SinkRecord> sinkRecords; 
@@ -35,7 +34,7 @@ public class EventBuilder {
         Map<String, List<SinkRecord>> byTopic = sinkRecords.stream()
         		.collect(groupingBy(SinkRecord::topic));
 
-        Map<String, List<SinkRecord>> srByTopic = Maps.filterKeys(byTopic, topic -> {
+        Map<String, List<SinkRecord>> recordsByTopic = filterKeys(byTopic, topic -> {
         	boolean isValidTopic = topics.contains(topic);
             if (!isValidTopic) {
                 log.debug("Topic {} not present", topic);
@@ -44,7 +43,7 @@ public class EventBuilder {
         });
 
         Map<String, List<InternalSinkRecord>> interalByTopic = 
-        		Maps.transformValues(srByTopic, sinkRecords -> {
+        		transformValues(recordsByTopic, sinkRecords -> {
 	        return sinkRecords.stream()
 	                .map(DataConverter::toInternalSinkRecord)
 	                .collect(toList());

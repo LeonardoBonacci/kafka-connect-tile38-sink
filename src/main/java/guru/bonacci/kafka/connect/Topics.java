@@ -1,38 +1,43 @@
 package guru.bonacci.kafka.connect;
 
+import static guru.bonacci.kafka.connect.Constants.COMMAND_PREFIX;
+import static lombok.AccessLevel.PRIVATE;
+import static com.google.common.collect.Maps.filterKeys;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Maps;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Topics configured to have a Redis command.
+ */
 @Getter
-@RequiredArgsConstructor
-public class Topics {
-
-	static final String FULL_PREFIX = "tile38.topic.";
+@RequiredArgsConstructor(access = PRIVATE)
+class Topics {
 
 	private final Map<String, String> cmdsByTopic;
 
-	Set<String> allTopics() {
+	
+	Set<String> configuredTopics() {
 		return cmdsByTopic.keySet();
 	}
 
-	static Topics from(Map<String, String> config) {
-		return new Topics(filterByPrefix(config));
-	}
-
-	static Map<String, String> filterByPrefix(Map<String, String> config) {
-		Map<String, String> topicsConfig = new HashMap<>(Maps.filterKeys(config, prop -> prop.startsWith(FULL_PREFIX)));
+	private static Map<String, String> filterByPrefix(Map<String, String> config) {
+		Map<String, String> topicsConfig = new HashMap<>(filterKeys(config, prop -> prop.startsWith(COMMAND_PREFIX)));
 
 		// just to change the keys; compare this hack with kotlin's mapKeys... :(
 		new ArrayList<>(topicsConfig.keySet())
-			.forEach(topic -> topicsConfig.put(topic.replace(FULL_PREFIX, ""), topicsConfig.remove(topic)));
+			.forEach(topic -> topicsConfig.put(topic.replace(COMMAND_PREFIX, ""), topicsConfig.remove(topic)));
 
 		return topicsConfig;
+	}
+	
+	static Topics from(Map<String, String> config) {
+		return new Topics(filterByPrefix(config));
 	}
 }

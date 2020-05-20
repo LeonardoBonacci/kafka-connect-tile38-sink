@@ -44,7 +44,7 @@ public class CommandGeneratorTest {
 				new HashSet<String>(Arrays.asList(cmdString.split(" "))));
 		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
 
-		String result = new CommandGenerator(q).preparedStatement(json);
+		String result = CommandGenerator.from(q).preparedStatement(json);
 	    assertThat(result, is("fooid is to be sub foosub and foofoo fooed"));
 	}
 
@@ -67,7 +67,7 @@ public class CommandGeneratorTest {
 				new HashSet<String>(Arrays.asList(cmdString.split(" "))));
 		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
 
-		String result = new CommandGenerator(q).compile(json).toCommandString();
+		String result = CommandGenerator.from(q).compile(json).toCommandString();
 	    assertThat(result, is("fooid is to be sub foosub and foofoo fooed"));
 	}
 
