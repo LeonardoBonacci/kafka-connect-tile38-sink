@@ -1,17 +1,16 @@
 package guru.bonacci.kafka.connect;
 
+import static com.google.common.collect.Maps.immutableEntry;
+import static com.google.common.collect.Sets.newHashSet;
 import static guru.bonacci.kafka.connect.Constants.TOKERATOR;
+import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.lang3.tuple.ImmutablePair.of;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import com.google.common.collect.Maps;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,16 +24,15 @@ public class CommandTemplates {
 		log.info("log something");
 		
 		commands = cmdsByTopic.entrySet().stream().map(topicCmd -> {
-			String commandString = topicCmd.getValue();
+			String cmdString = topicCmd.getValue();
 			
-		    Set<String> terms = new HashSet<>();
-		    CollectionUtils.addAll(terms, commandString.split(" "));
-		    ImmutablePair<String, Set<String>> cmd = new ImmutablePair<>(commandString, terms);
+		    Set<String> terms = newHashSet(cmdString.split(" "));
+		    ImmutablePair<String, Set<String>> cmd = of(cmdString, terms);
 		    cmd.right.removeIf(s -> !s.startsWith(TOKERATOR));
 	
-		    return Maps.immutableEntry(topicCmd.getKey(), cmd);
+		    return immutableEntry(topicCmd.getKey(), cmd);
 		})
-		.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	Stream<String> allTopics() {

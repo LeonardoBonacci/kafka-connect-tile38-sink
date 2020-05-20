@@ -7,7 +7,4 @@ public class Constants {
 	static final String TOKERATOR = TOKEN + SEPARATOR;
 	
 	static final String COMMAND_PREFIX = "tile38.topic.";
-
-	
-
 }
