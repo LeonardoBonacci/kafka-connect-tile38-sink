@@ -8,8 +8,8 @@
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "false",
 
-    "command.foo": "foo event.id FIELD route event.route POINT event.lat event.lon",
-    "command.bar": "bar event.id FIELD route event.route POINT event.lat event.lon",
+    "tile38.topic.foo": "foo event.id FIELD route event.route POINT event.lat event.lon",
+    "tile38.topic.bar": "bar event.id FIELD route event.route POINT event.lat event.lon",
 
     "tile38.url": "tile38",
     "tile38.port": 9851,
