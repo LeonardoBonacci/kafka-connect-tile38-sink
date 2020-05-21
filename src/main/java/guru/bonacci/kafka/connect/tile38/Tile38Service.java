@@ -1,7 +1,6 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
-import static guru.bonacci.kafka.connect.CommandGenerators.from;
-import static guru.bonacci.kafka.connect.CommandGenerator.from;
+import static guru.bonacci.kafka.connect.tile38.CommandGenerator.from;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
@@ -14,8 +13,10 @@ import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.StatusOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+@Getter
 @Slf4j
 class Tile38Service {
 
@@ -30,7 +31,7 @@ class Tile38Service {
     	this.client = RedisClient.create(String.format("redis://%s:%d", config.getTile38Url(), config.getTile38Port()));
 		this.sync = client.connect().sync();
 
-		this.cmds = from(cmdTemplates.allTopics()
+		this.cmds = CommandGenerators.from(cmdTemplates.allTopics()
 				.collect(toMap(identity(), topic -> from(cmdTemplates.commandForTopic(topic)))));
     }
 

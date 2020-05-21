@@ -1,6 +1,6 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
-import static guru.bonacci.kafka.connect.Constants.TOKERATOR;
+import static guru.bonacci.kafka.connect.tile38.Constants.TOKERATOR;
 import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;

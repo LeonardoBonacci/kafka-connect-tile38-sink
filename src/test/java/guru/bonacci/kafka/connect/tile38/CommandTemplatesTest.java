@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -11,6 +11,9 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMap;
+
+import guru.bonacci.kafka.connect.tile38.CommandTemplates;
+import guru.bonacci.kafka.connect.tile38.Topics;
 
 
 public class CommandTemplatesTest {

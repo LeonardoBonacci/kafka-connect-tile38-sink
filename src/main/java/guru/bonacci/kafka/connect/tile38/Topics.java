@@ -1,8 +1,8 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
-import static guru.bonacci.kafka.connect.Constants.COMMAND_PREFIX;
 import static lombok.AccessLevel.PRIVATE;
 import static com.google.common.collect.Maps.filterKeys;
+import static guru.bonacci.kafka.connect.tile38.Constants.COMMAND_PREFIX;
 
 import java.util.ArrayList;
 import java.util.HashMap;

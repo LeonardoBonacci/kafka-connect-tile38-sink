@@ -1,11 +1,9 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
-import static guru.bonacci.kafka.connect.CommandTemplates.from;
-import static guru.bonacci.kafka.connect.Topics.from;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
-import static org.apache.kafka.connect.sink.SinkTask.TOPICS_CONFIG;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.kafka.connect.sink.SinkTask.TOPICS_CONFIG;
 
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +13,8 @@ import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
 import org.apache.kafka.common.config.ConfigException;
+
+import com.google.common.collect.Sets;
 
 public class Tile38SinkConnectorConfig extends AbstractConfig {
 
@@ -34,8 +34,8 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	public Tile38SinkConnectorConfig(ConfigDef config, Map<String, String> props) {
 		super(config, props);
 		
-		topics = from(props); 
-		cmdTemplates = from(topics);
+		topics = Topics.from(props); 
+		cmdTemplates = CommandTemplates.from(topics);
 
 		validateConfiguredTopics(props);
 	}
@@ -48,8 +48,8 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 				 
         Set<String> configuredTopics = this.topics.configuredTopics();
 
-        if (topics != configuredTopics) {
-            throw new ConfigException("There is a mismatch between topics defined into the property `${SinkTask.TOPICS_CONFIG}` ($topics) and configured topics ($allTopics)");
+        if (!Sets.symmetricDifference(topics, configuredTopics).isEmpty()) {
+            throw new ConfigException(String.format("There is a mismatch between topics defined into the property `topics` %s and configured topics %s", topics, configuredTopics));
         }
     }
 	

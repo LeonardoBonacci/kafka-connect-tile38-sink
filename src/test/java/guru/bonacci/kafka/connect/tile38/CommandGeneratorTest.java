@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import guru.bonacci.kafka.connect.tile38.CommandGenerator;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -10,6 +10,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMap;
+
+import guru.bonacci.kafka.connect.tile38.Topics;
 
 public class TopicsTest {
 

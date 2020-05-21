@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
 import static java.util.Collections.singletonMap;
 import static java.nio.charset.StandardCharsets.UTF_8;

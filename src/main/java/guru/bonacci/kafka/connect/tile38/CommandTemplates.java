@@ -1,8 +1,8 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
 import static com.google.common.collect.Maps.immutableEntry;
 import static com.google.common.collect.Sets.newHashSet;
-import static guru.bonacci.kafka.connect.Constants.TOKERATOR;
+import static guru.bonacci.kafka.connect.tile38.Constants.TOKERATOR;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.tuple.ImmutablePair.of;
 
