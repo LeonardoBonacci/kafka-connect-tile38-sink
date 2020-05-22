@@ -5,6 +5,7 @@ import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static lombok.AccessLevel.PRIVATE;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -15,19 +16,16 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import io.lettuce.core.protocol.CommandArgs;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor(access = PRIVATE)
 public class CommandGenerator {
 
 	// command string with terms
 	private final Pair<String, Set<String>> cmd;
 
-	
-	private CommandGenerator(Pair<String, Set<String>> cmd) {
-		this.cmd = cmd;
-		this.cmd.getRight().removeIf(s -> !s.startsWith(TOKERATOR));
-	}
 	
 	CommandArgs<String, String> compile(Map<String, String> json) {
 		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
@@ -60,6 +58,7 @@ public class CommandGenerator {
 	}
 	
 	static CommandGenerator from(Pair<String, Set<String>> cmd) {
+		cmd.getRight().removeIf(s -> !s.startsWith(TOKERATOR));
 		return new CommandGenerator(cmd);
 	}
 }

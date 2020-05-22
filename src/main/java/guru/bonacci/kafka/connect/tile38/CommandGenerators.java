@@ -4,6 +4,8 @@ import static lombok.AccessLevel.PRIVATE;
 
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = PRIVATE)
@@ -17,6 +19,9 @@ public class CommandGenerators {
 	}
 	
 	static CommandGenerators from(Map<String, CommandGenerator> cmds) {
+		if (cmds == null)
+			cmds = ImmutableMap.of();
+
 		return new CommandGenerators(cmds);
 	}
 }

@@ -21,6 +21,7 @@ public class DataConverter {
 		JSON_CONVERTER.configure(singletonMap("schemas.enable", "false"), false);
 	}
 
+	
 	static InternalSinkRecord toInternalSinkRecord(SinkRecord sinkRecord) {
 		return new InternalSinkRecord(convertData(sinkRecord));
 	}

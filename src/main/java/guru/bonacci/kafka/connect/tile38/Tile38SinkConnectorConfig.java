@@ -1,5 +1,6 @@
 package guru.bonacci.kafka.connect.tile38;
 
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
@@ -18,6 +19,7 @@ import com.google.common.collect.Sets;
 
 public class Tile38SinkConnectorConfig extends AbstractConfig {
 
+	//TODO connect to multiple hosts?
 	public static final String TILE38_URL = "tile38.url";
 	private static final String TILE38_URL_DOC = "Tile38 URL to connect.";
 	public static final String TILE38_PORT = "tile38.port";
@@ -43,13 +45,14 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 
 	private void validateConfiguredTopics(Map<String, String> props) {
 		 Set<String> topics = props.containsKey(TOPICS_CONFIG)
-				? stream(props.get(TOPICS_CONFIG).split(",")).map(String::trim).collect(toSet()) 
+				? stream((props.get(TOPICS_CONFIG).trim()).split(",")).map(String::trim).collect(toSet()) 
 				: emptySet();
 				 
         Set<String> configuredTopics = this.topics.configuredTopics();
 
         if (!Sets.symmetricDifference(topics, configuredTopics).isEmpty()) {
-            throw new ConfigException(String.format("There is a mismatch between topics defined into the property `topics` %s and configured topics %s", topics, configuredTopics));
+            throw new ConfigException(format("There is a mismatch between topics defined into the property 'topics' %s and configured topics %s", 
+            		topics, configuredTopics));
         }
     }
 	

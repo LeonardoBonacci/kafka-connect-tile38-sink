@@ -17,11 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommandTemplates {
 
+	// Contains - by topic - a tuple 'command string' with 'event.fields'
 	private final Map<String, Pair<String, Set<String>>> commands;
 
 	
 	private CommandTemplates(Map<String, String> cmdsByTopic) { 
-		log.info("log something");
+		log.info("Creating command data structure for {}", cmdsByTopic);
 		
 		commands = cmdsByTopic.entrySet().stream().map(topicCmd -> {
 			String cmdString = topicCmd.getValue();
@@ -35,7 +36,7 @@ public class CommandTemplates {
 		.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
-	Stream<String> allTopics() {
+	Stream<String> configuredTopics() {
 		return commands.keySet().stream();
 	}
 

@@ -12,8 +12,8 @@ import org.apache.kafka.connect.sink.SinkTask;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-@Getter
 @Slf4j
+@Getter
 public class Tile38SinkTask extends SinkTask {
 
 	private Tile38SinkConnectorConfig config;

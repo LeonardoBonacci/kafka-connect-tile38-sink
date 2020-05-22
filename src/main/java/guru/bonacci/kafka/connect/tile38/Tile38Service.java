@@ -16,8 +16,8 @@ import io.lettuce.core.protocol.CommandType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-@Getter
 @Slf4j
+@Getter
 class Tile38Service {
 
 	private final RedisClient client;
@@ -31,13 +31,14 @@ class Tile38Service {
     	this.client = RedisClient.create(String.format("redis://%s:%d", config.getTile38Url(), config.getTile38Port()));
 		this.sync = client.connect().sync();
 
-		this.cmds = CommandGenerators.from(cmdTemplates.allTopics()
+		this.cmds = CommandGenerators.from(cmdTemplates.configuredTopics()
 				.collect(toMap(identity(), topic -> from(cmdTemplates.commandForTopic(topic)))));
     }
 
     void writeForTopic(String topic, List<InternalSinkRecord> events) {
     	events.forEach(event -> {
-			CommandArgs<String, String> cmd = cmds.by(topic).compile(event.getValue());
+    		//TODO implement DELETE
+    		CommandArgs<String, String> cmd = cmds.by(topic).compile(event.getValue());
 			String resp = sync.dispatch(CommandType.SET, new StatusOutput<>(StringCodec.UTF8), cmd);
 			log.info("tile38 answers {}", resp);
 		});	

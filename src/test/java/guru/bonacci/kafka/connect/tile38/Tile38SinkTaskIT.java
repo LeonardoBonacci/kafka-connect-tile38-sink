@@ -42,7 +42,7 @@ import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
 
 @Testcontainers
-public class Tile38SinkTaskTest {
+public class Tile38SinkTaskIT {
 
 	@SuppressWarnings("rawtypes")
 	@Container
