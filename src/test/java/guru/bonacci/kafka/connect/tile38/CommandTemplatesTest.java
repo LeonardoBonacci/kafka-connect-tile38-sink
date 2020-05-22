@@ -7,13 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMap;
-
-import guru.bonacci.kafka.connect.tile38.CommandTemplates;
-import guru.bonacci.kafka.connect.tile38.Topics;
 
 
 public class CommandTemplatesTest {
@@ -30,15 +27,15 @@ public class CommandTemplatesTest {
 
 	    assertThat(cmds.allTopics().count(), is(2l));
 
-	    ImmutablePair<String, Set<String>> fooCmd = cmds.commandForTopic("foo");
-	    assertThat(fooCmd.left, is("foo query event.here"));
-	    assertThat(fooCmd.right.size(), is(1));
-	    assertThat(fooCmd.right.iterator().next(), is("event.here"));
+	    Pair<String, Set<String>> fooCmd = cmds.commandForTopic("foo");
+	    assertThat(fooCmd.getLeft(), is("foo query event.here"));
+	    assertThat(fooCmd.getRight().size(), is(1));
+	    assertThat(fooCmd.getRight().iterator().next(), is("event.here"));
 
-	    ImmutablePair<String, Set<String>> barCmd = cmds.commandForTopic("bar");
-	    assertThat(barCmd.left, is("bar event.query here"));
-	    assertThat(barCmd.right.size(), is(1));
-	    assertThat(barCmd.right.iterator().next(), is("event.query"));
+	    Pair<String, Set<String>> barCmd = cmds.commandForTopic("bar");
+	    assertThat(barCmd.getLeft(), is("bar event.query here"));
+	    assertThat(barCmd.getRight().size(), is(1));
+	    assertThat(barCmd.getRight().iterator().next(), is("event.query"));
 	}
 
 }

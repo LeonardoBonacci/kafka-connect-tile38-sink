@@ -4,20 +4,20 @@ import static com.google.common.collect.Maps.immutableEntry;
 import static com.google.common.collect.Sets.newHashSet;
 import static guru.bonacci.kafka.connect.tile38.Constants.TOKERATOR;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.tuple.ImmutablePair.of;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CommandTemplates {
 
-	private final Map<String, ImmutablePair<String, Set<String>>> commands;
+	private final Map<String, Pair<String, Set<String>>> commands;
 
 	
 	private CommandTemplates(Map<String, String> cmdsByTopic) { 
@@ -27,8 +27,8 @@ public class CommandTemplates {
 			String cmdString = topicCmd.getValue();
 			
 		    Set<String> terms = newHashSet(cmdString.split(" "));
-		    ImmutablePair<String, Set<String>> cmd = of(cmdString, terms);
-		    cmd.right.removeIf(s -> !s.startsWith(TOKERATOR));
+		    Pair<String, Set<String>> cmd = ImmutablePair.of(cmdString, terms);
+		    cmd.getRight().removeIf(s -> !s.startsWith(TOKERATOR));
 	
 		    return immutableEntry(topicCmd.getKey(), cmd);
 		})
@@ -39,7 +39,7 @@ public class CommandTemplates {
 		return commands.keySet().stream();
 	}
 
-	ImmutablePair<String, Set<String>> commandForTopic(String topic) {
+	Pair<String, Set<String>> commandForTopic(String topic) {
 		return commands.get(topic);
 	}
 	

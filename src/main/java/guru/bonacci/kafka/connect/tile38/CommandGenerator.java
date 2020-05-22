@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import io.lettuce.core.protocol.CommandArgs;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +21,12 @@ import lombok.extern.slf4j.Slf4j;
 public class CommandGenerator {
 
 	// command string with terms
-	private final ImmutablePair<String, Set<String>> cmd;
+	private final Pair<String, Set<String>> cmd;
 
 	
-	private CommandGenerator(ImmutablePair<String, Set<String>> cmd) {
+	private CommandGenerator(Pair<String, Set<String>> cmd) {
 		this.cmd = cmd;
-		this.cmd.right.removeIf(s -> !s.startsWith(TOKERATOR));
+		this.cmd.getRight().removeIf(s -> !s.startsWith(TOKERATOR));
 	}
 	
 	CommandArgs<String, String> compile(Map<String, String> json) {
@@ -39,7 +39,7 @@ public class CommandGenerator {
 
 	// visible for testing
 	String preparedStatement(Map<String, String> json) {
-		Stream<String> events = cmd.right.stream();
+		Stream<String> events = cmd.getRight().stream();
 		Map<String, String> parsed = events.collect(toMap(identity(), ev -> {
 			try {
 				String prop = ev.replace(TOKERATOR, "");
@@ -51,7 +51,7 @@ public class CommandGenerator {
 			}
 		}));
 
-		String result = cmd.left;
+		String result = cmd.getLeft();
 		for (Map.Entry<String, String> entry : parsed.entrySet()) {
 			result = result.replaceAll(entry.getKey(), entry.getValue());
 		}
@@ -59,8 +59,7 @@ public class CommandGenerator {
 		return result;
 	}
 	
-	static CommandGenerator from(ImmutablePair<String, Set<String>> cmd) {
+	static CommandGenerator from(Pair<String, Set<String>> cmd) {
 		return new CommandGenerator(cmd);
 	}
-
 }
