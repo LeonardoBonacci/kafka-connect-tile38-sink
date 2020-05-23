@@ -1,4 +1,4 @@
-Welcome to yet another Kafka Connect connector!
+Welcome to yet another Kafka Connect connector: this time it's a Sink to Tile38 (https://tile38.com/)!
 
 # Run
 
@@ -13,3 +13,10 @@ Welcome to yet another Kafka Connect connector!
 
 * curl localhost:8083/connectors | jq
 * curl -X DELETE -H "Content-type: application/json" http://localhost:8083/connectors/tile | jq
+
+#TODO
+
+* tombstones/deletes
+* batch insert
+* ssl
+
