@@ -4,6 +4,7 @@ import static guru.bonacci.kafka.connect.tile38.Constants.TOKERATOR;
 import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
+import static java.util.regex.Matcher.quoteReplacement;
 import static java.util.stream.Collectors.toMap;
 import static lombok.AccessLevel.PRIVATE;
 
@@ -51,7 +52,7 @@ public class CommandGenerator {
 
 		String result = cmd.getLeft();
 		for (Map.Entry<String, String> entry : parsed.entrySet()) {
-			result = result.replaceAll(entry.getKey(), entry.getValue());
+			result = result.replaceAll(entry.getKey(), quoteReplacement(entry.getValue()));
 		}
 
 		return result;

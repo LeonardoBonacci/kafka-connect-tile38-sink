@@ -1,11 +1,11 @@
 package guru.bonacci.kafka.connect.tile38;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.filterKeys;
 import static com.google.common.collect.Maps.transformValues;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static org.testcontainers.shaded.com.google.common.collect.Lists.newArrayList;
-import static org.testcontainers.shaded.com.google.common.collect.Sets.newHashSet;
 
 import java.util.Collection;
 import java.util.List;

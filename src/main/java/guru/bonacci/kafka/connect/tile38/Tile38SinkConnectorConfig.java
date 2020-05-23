@@ -42,7 +42,6 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 		validateConfiguredTopics(props);
 	}
 
-
 	private void validateConfiguredTopics(Map<String, String> props) {
 		 Set<String> topics = props.containsKey(TOPICS_CONFIG)
 				? stream((props.get(TOPICS_CONFIG).trim()).split(",")).map(String::trim).collect(toSet()) 
