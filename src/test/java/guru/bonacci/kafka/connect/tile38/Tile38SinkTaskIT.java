@@ -16,6 +16,7 @@ import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.junit.jupiter.api.AfterEach;
@@ -34,7 +35,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonParser;
 
-import io.lettuce.core.RedisCommandExecutionException;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.StatusOutput;
@@ -172,7 +172,7 @@ public class Tile38SinkTaskIT {
 		Struct value = new Struct(schema).put("id", id).put("route", route).put("lat", lat).put("lon", lon);
 
 		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, id, schema, value));
-		Assertions.assertThrows(RedisCommandExecutionException.class, () -> {
+		Assertions.assertThrows(ConnectException.class, () -> {
 			this.task.put(records);
 		});
 	}
@@ -227,7 +227,7 @@ public class Tile38SinkTaskIT {
 		Struct value = new Struct(schema).put("one", one).put("two", two).put("three", three);
 
 		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, one, schema, value));
-		Assertions.assertThrows(RedisCommandExecutionException.class, () -> {
+		Assertions.assertThrows(ConnectException.class, () -> {
 			this.task.put(records);
 		});
 	}

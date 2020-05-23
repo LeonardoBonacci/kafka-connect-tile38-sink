@@ -7,7 +7,10 @@ import static java.util.stream.Collectors.toMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.kafka.connect.errors.ConnectException;
+
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisCommandExecutionException;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.StatusOutput;
@@ -37,11 +40,16 @@ class Tile38Service {
 
     void writeForTopic(String topic, List<InternalSinkRecord> events) {
     	events.forEach(event -> {
-    		//TODO implement DELETE
     		CommandArgs<String, String> cmd = cmds.by(topic).compile(event.getValue());
-			String resp = sync.dispatch(CommandType.SET, new StatusOutput<>(StringCodec.UTF8), cmd);
-			log.info("tile38 answers {}", resp);
-		});	
+			
+			try {
+				String resp = sync.dispatch(CommandType.SET, new StatusOutput<>(StringCodec.UTF8), cmd);
+				log.info("tile38 answers {}", resp);
+			} catch (RedisCommandExecutionException e) {
+                log.warn("Exception {} while executing query: {}, with data: {}", e.getMessage(), cmd.toCommandString(), event.getValue());
+				throw new ConnectException(e);
+			}
+    	});	
     }
 
     void writeData(Map<String, List<InternalSinkRecord>> data) {

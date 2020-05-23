@@ -15,7 +15,6 @@
 		<kafka.version>2.5.0</kafka.version>
 		<junit.version>5.7.0-M1</junit.version>
 		<testcontainers.version>1.14.1</testcontainers.version>
-		<log4j.version>2.13.3</log4j.version>
 	</properties>
 
 	<repositories>
@@ -78,14 +77,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<version>${log4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>${log4j.version}</version>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.3</version>
 		</dependency>
 
 		<dependency>

@@ -32,7 +32,7 @@ public class CommandGenerator {
 		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
 		asList(preparedStatement(json).split(" ")).forEach(cmd::add);
 		
-		log.debug(cmd.toCommandString());
+		log.debug("compiled to: {}", cmd.toCommandString());
 	    return cmd;
 	}
 
@@ -45,7 +45,7 @@ public class CommandGenerator {
 				Object val = PropertyUtils.getProperty(json, prop);
 				return val != null ? String.valueOf(val) : ev;
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-				// ignore mismatch
+				// ignore mismatch, it will result in an invalid command to be bounced by Tile38
 				return ev;
 			}
 		}));
