@@ -1,7 +1,7 @@
 {
   "name": "tile",
   "config": {
-    "connector.class": "guru.bonacci.kafka.connect.Tile38SinkConnector",
+    "connector.class": "guru.bonacci.kafka.connect.tile38.Tile38SinkConnector",
     "topics": "foo,bar",
 
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
