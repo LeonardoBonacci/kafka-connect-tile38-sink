@@ -1,0 +1,19 @@
+{
+  "name": "datagen-foo",
+  "config": {
+    "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
+    "kafka.topic": "foo",
+
+    "schema.filename": "/tmp/foobar.avro",
+    "schema.keyfield": "id",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+
+    "max.interval": 500,
+    "iterations": 1000000,
+
+    "tasks.max": "1"
+  }
+}

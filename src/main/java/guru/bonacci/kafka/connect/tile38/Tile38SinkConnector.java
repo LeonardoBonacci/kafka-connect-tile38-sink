@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect;
+package guru.bonacci.kafka.connect.tile38;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,10 +15,9 @@ public class Tile38SinkConnector extends SinkConnector {
 
 	private Map<String, String> configProperties;
 
-	
 	@Override
 	public String version() {
-		return VersionUtil.getVersion();
+		return Version.getVersion();
 	}
 
 	@Override
@@ -48,7 +47,7 @@ public class Tile38SinkConnector extends SinkConnector {
 	}
 
 	@Override
-	public void stop() {
+	public void stop() throws ConnectException {
 	}
 
 	@Override

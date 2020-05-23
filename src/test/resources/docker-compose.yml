@@ -1,0 +1,6 @@
+version: "2"
+services:
+  tile38:
+    image: tile38/tile38
+    ports:
+      - "9851:9851"
