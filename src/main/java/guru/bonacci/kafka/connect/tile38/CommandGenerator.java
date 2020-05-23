@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.connect.errors.DataException;
 
 import io.lettuce.core.protocol.CommandArgs;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class CommandGenerator {
 		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
 		asList(preparedStatement(json).split(" ")).forEach(cmd::add);
 		
-		log.debug("compiled to: {}", cmd.toCommandString());
+		log.debug("Compiled to: {}", cmd.toCommandString());
 	    return cmd;
 	}
 
@@ -43,10 +44,13 @@ public class CommandGenerator {
 			try {
 				String prop = ev.replace(TOKERATOR, "");
 				Object val = PropertyUtils.getProperty(json, prop);
-				return val != null ? String.valueOf(val) : ev;
+
+				if (val == null)
+					throw new IllegalAccessException();
+				return String.valueOf(val);
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-				// ignore mismatch, it will result in an invalid command to be bounced by Tile38
-				return ev;
+				log.warn("Field mismatch command {}, and sink record {}", ev, json);
+				throw new DataException("Field mismatch between command and sink record", e);
 			}
 		}));
 

@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.connect.errors.DataException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Sets;
@@ -79,4 +81,22 @@ public class CommandGeneratorTests {
 		String result = CommandGenerator.from(q).compile(json).toCommandString();
 	    assertThat(result, is("fooid is to be sub foosub and foofoo fooed"));
 	}
+	
+	@Test
+	void missingField() {
+		final String cmdString = "event.id is to be event.sub";
+
+		JsonObject sinkRecord = new JsonObject();
+		sinkRecord.addProperty("id", "fooid");
+
+		Pair<String, Set<String>> q = new ImmutablePair<>(
+				cmdString, 
+				Sets.newHashSet(cmdString.split(" ")));
+		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
+
+		Assertions.assertThrows(DataException.class, () -> {
+			CommandGenerator.from(q).compile(json);
+		});
+	}
+
 }
