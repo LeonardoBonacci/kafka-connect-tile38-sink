@@ -2,23 +2,22 @@ package guru.bonacci.kafka.connect.tile38;
 
 import static com.github.jcustenborder.kafka.connect.utils.SinkRecordHelper.write;
 import static io.lettuce.core.codec.StringCodec.UTF8;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
-import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
-import org.apache.kafka.connect.sink.SinkTaskContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +31,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.gson.JsonParser;
 
 import io.lettuce.core.RedisCommandExecutionException;
@@ -41,9 +40,15 @@ import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.StatusOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+/**
+ * Sending plain Redis to Tile38 these are some commands:
+ * SET foo fooid FIELD route 12.3 POINT 4.56 7.89
+ * GET foo fooid -> {"type":"Point","coordinates":[7.89,4.56]}
+ * GET foo fooid WITHFIELDS -> {"type":"Point","coordinates":[7.89,4.56]},"fields":{"route":12.3}
+ * 
+ * For reasons I have yet to comprehend the WITHFIELD variant returns only the 'fields' using Lettuce.
+ */
 @Testcontainers
 public class Tile38SinkTaskIT {
 
@@ -56,13 +61,14 @@ public class Tile38SinkTaskIT {
 	private String host;
 	private String port;
 	private Tile38SinkTask task;
-	
+	private JsonParser parser = new JsonParser();
+
+	private static final String RESULT_STRING = "{\"type\":\"Point\",\"coordinates\":[%s,%s]}";
+
 	@BeforeEach
 	void setup() {
-	    log.info("Set up containers");
-
-		host = composeContainer.getServiceHost("tile38", 9851);
-		port = String.valueOf(composeContainer.getServicePort("tile38", 9851));
+		this.host = composeContainer.getServiceHost("tile38", 9851);
+		this.port = String.valueOf(composeContainer.getServicePort("tile38", 9851));
 		this.task = new Tile38SinkTask();
 	}
 
@@ -74,57 +80,37 @@ public class Tile38SinkTaskIT {
 	@Test
 	public void emptyAssignment() {
 		final String topic = "foo";
-		SinkTaskContext context = mock(SinkTaskContext.class);
-		when(context.assignment()).thenReturn(ImmutableSet.of());
-		this.task.initialize(context);
 
 		Assertions.assertThrows(ConfigException.class, () -> {
-			this.task.start(ImmutableMap.of(SinkTask.TOPICS_CONFIG, topic, Tile38SinkConnectorConfig.TILE38_URL, host,
-					Tile38SinkConnectorConfig.TILE38_PORT, port));
+			Map<String, String> config = Maps.newHashMap(provideConfig(topic));
+			config.remove("tile38.topic.foo");
+			this.task.start(config);
 		});
 	}
 
 	@Test
 	public void invalidTopics() {
 		final String topic = "*#^$(^#$(&(#*$&($&(Q#";
-		SinkTaskContext context = mock(SinkTaskContext.class);
-		when(context.assignment()).thenReturn(ImmutableSet.of(new TopicPartition(topic, 1)));
-		this.task.initialize(context);
 
 		Assertions.assertThrows(ConfigException.class, () -> {
-			this.task.start(ImmutableMap.of(SinkTask.TOPICS_CONFIG, topic, 
-					Tile38SinkConnectorConfig.TILE38_URL, host,
-					Tile38SinkConnectorConfig.TILE38_PORT, port, 
-					"tile38.topic.foo", "foo event.id FIELD route event.route POINT event.lat event.lon"));
+			this.task.start(provideConfig(topic));
 		});
 	}
 
 	@Test
 	public void unconfiguredTopic() {
 		final String topic = "foo,bar";
-		SinkTaskContext context = mock(SinkTaskContext.class);
-		when(context.assignment()).thenReturn(ImmutableSet.of(new TopicPartition(topic, 1)));
-		this.task.initialize(context);
 
 		Assertions.assertThrows(ConfigException.class, () -> {
-			this.task.start(ImmutableMap.of(SinkTask.TOPICS_CONFIG, topic, 
-					Tile38SinkConnectorConfig.TILE38_URL, host,
-					Tile38SinkConnectorConfig.TILE38_PORT, port, 
-					"tile38.topic.foo", "foo event.id FIELD route event.route POINT event.lat event.lon"));
+			this.task.start(provideConfig(topic));
 		});
 	}
 
 	@Test
-	public void putEmpty() {
+	public void empty() {
 		final String topic = "foo";
-		SinkTaskContext context = mock(SinkTaskContext.class);
-		when(context.assignment()).thenReturn(ImmutableSet.of(new TopicPartition(topic, 1)));
-		this.task.initialize(context);
 
-		this.task.start(ImmutableMap.of(SinkTask.TOPICS_CONFIG, topic, Tile38SinkConnectorConfig.TILE38_URL, host,
-				Tile38SinkConnectorConfig.TILE38_PORT, "" + port, "tile38.topic.foo",
-				"foo event.id FIELD route event.route POINT event.lat event.lon"));
-
+		this.task.start(provideConfig(topic));
 		this.task.put(ImmutableList.of());
 	}
 
@@ -141,42 +127,24 @@ public class Tile38SinkTaskIT {
 	
 	@ParameterizedTest
 	@MethodSource("provideInputForValidWrite")
-	public void putValidWrite(String route, String lat, String lon) {
-	    log.info("Executing putValidWrite with arguments {} {} {}", route, lat, lon);
-
+	public void validWrites(String route, String lat, String lon) {
 	    final String topic = "foo";
-		SinkTaskContext context = mock(SinkTaskContext.class);
-		when(context.assignment()).thenReturn(ImmutableSet.of(new TopicPartition(topic, 1)));
-		this.task.initialize(context);
-		this.task.start(ImmutableMap.<String, String>builder().put(SinkTask.TOPICS_CONFIG, topic)
-				.put(Tile38SinkConnectorConfig.TILE38_URL, host).put(Tile38SinkConnectorConfig.TILE38_PORT, port)
-				.put("tile38.topic.foo", "foo event.id FIELD route event.route POINT event.lat event.lon").build());
+	    this.task.start(provideConfig(topic));
 
-		final String key = "fooid";
+		final String id = "fooid";
+		Schema schema = getRouteSchema();
+		Struct value = new Struct(schema).put("id", id).put("route", route).put("lat", lat).put("lon", lon);
 
-		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA).field("route", Schema.STRING_SCHEMA)
-				.field("lat", Schema.STRING_SCHEMA).field("lon", Schema.STRING_SCHEMA).build();
-
-		Struct value = new Struct(schema).put("id", key).put("route", route).put("lat", lat).put("lon", lon);
-
-		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, key, schema, value));
-
+		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, id, schema, value));
 		this.task.put(records);
 
 		RedisCommands<String, String> sync = this.task.getService().getSync();
-
-		CommandArgs<String, String> get = new CommandArgs<>(UTF8);
-		get.add("foo");
-		get.add(key);
-
+		CommandArgs<String, String> get = getFooCommand(id);
 		String resp = sync.dispatch(CommandType.GET, new StatusOutput<>(StringCodec.UTF8), get);
-		JsonParser parser = new JsonParser();
-		assertEquals(parser.parse(String.format("{\"type\":\"Point\",\"coordinates\":[%s,%s]}", lon, lat)), parser.parse(resp));
+		assertThat(parser.parse(resp), is(equalTo(parser.parse(String.format(RESULT_STRING, lon, lat)))));
 
-		get.add("WITHFIELDS");
-		resp = sync.dispatch(CommandType.GET, new StatusOutput<>(StringCodec.UTF8), get);
-
-		assertEquals(route, resp);
+		resp = executeWithFieldsCommand(sync, get);
+		assertThat(resp, is(equalTo(route)));
 	}
 
 	private static Stream<Arguments> provideInputForInvalidWrite() {
@@ -195,26 +163,15 @@ public class Tile38SinkTaskIT {
 
 	@ParameterizedTest
 	@MethodSource("provideInputForInvalidWrite")
-	public void putInvalidWrite(String route, String lat, String lon) {
-	    log.info("Executing putValidWrite with arguments {} {} {}", route, lat, lon);
-
+	public void invalidWrites(String route, String lat, String lon) {
 	    final String topic = "foo";
-		SinkTaskContext context = mock(SinkTaskContext.class);
-		when(context.assignment()).thenReturn(ImmutableSet.of(new TopicPartition(topic, 1)));
-		this.task.initialize(context);
-		this.task.start(ImmutableMap.<String, String>builder().put(SinkTask.TOPICS_CONFIG, topic)
-				.put(Tile38SinkConnectorConfig.TILE38_URL, host).put(Tile38SinkConnectorConfig.TILE38_PORT, port)
-				.put("tile38.topic.foo", "foo event.id FIELD route event.route POINT event.lat event.lon").build());
+		this.task.start(provideConfig(topic));
 
-		final String key = "fooid";
+		final String id = "fooid";
+		Schema schema = getRouteSchema();
+		Struct value = new Struct(schema).put("id", id).put("route", route).put("lat", lat).put("lon", lon);
 
-		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA).field("route", Schema.STRING_SCHEMA)
-				.field("lat", Schema.STRING_SCHEMA).field("lon", Schema.STRING_SCHEMA).build();
-
-		Struct value = new Struct(schema).put("id", key).put("route", route).put("lat", lat).put("lon", lon);
-
-		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, key, schema, value));
-
+		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, id, schema, value));
 		Assertions.assertThrows(RedisCommandExecutionException.class, () -> {
 			this.task.put(records);
 		});
@@ -229,38 +186,22 @@ public class Tile38SinkTaskIT {
 
 	@ParameterizedTest
 	@MethodSource("provideInputForIgnoredFieldWrite")
-	public void putInvalidFieldWrite(String route, String lat, String lon) {
-	    log.info("Executing putValidWrite with arguments {} {} {}", route, lat, lon);
-
+	public void invalidFieldWrites(String route, String lat, String lon) {
 	    final String topic = "foo";
-		SinkTaskContext context = mock(SinkTaskContext.class);
-		when(context.assignment()).thenReturn(ImmutableSet.of(new TopicPartition(topic, 1)));
-		this.task.initialize(context);
-		this.task.start(ImmutableMap.<String, String>builder().put(SinkTask.TOPICS_CONFIG, topic)
-				.put(Tile38SinkConnectorConfig.TILE38_URL, host).put(Tile38SinkConnectorConfig.TILE38_PORT, port)
-				.put("tile38.topic.foo", "foo event.id FIELD route event.route POINT event.lat event.lon").build());
+		this.task.start(provideConfig(topic));
 
-		final String key = "fooid";
+		final String id = "fooid";
+		Schema schema = getRouteSchema();
+		Struct value = new Struct(schema).put("id", id).put("route", route).put("lat", lat).put("lon", lon);
 
-		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA).field("route", Schema.STRING_SCHEMA)
-				.field("lat", Schema.STRING_SCHEMA).field("lon", Schema.STRING_SCHEMA).build();
-
-		Struct value = new Struct(schema).put("id", key).put("route", route).put("lat", lat).put("lon", lon);
-
-		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, key, schema, value));
-
+		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, id, schema, value));
 		this.task.put(records);
-		
+
 		RedisCommands<String, String> sync = this.task.getService().getSync();
+		CommandArgs<String, String> getCmd = getFooCommand(id);
+		String resp = executeWithFieldsCommand(sync, getCmd);
 
-		CommandArgs<String, String> get = new CommandArgs<>(UTF8);
-		get.add("foo");
-		get.add(key);
-		get.add("WITHFIELDS");
-		String resp = sync.dispatch(CommandType.GET, new StatusOutput<>(StringCodec.UTF8), get);
-
-		assertNotEquals(route, resp);
-
+		assertThat(resp, is(not(equalTo(route))));
 	}
 
 	private static Stream<Arguments> provideInvalidCommands() {
@@ -275,25 +216,47 @@ public class Tile38SinkTaskIT {
 	
 	@ParameterizedTest
 	@MethodSource("provideInvalidCommands")
-	public void putInvalidCommandsWrite(String cmdString, String one, String two, String three) {
+	public void invalidCommandWrites(String cmdString, String one, String two, String three) {
 	    final String topic = "foo";
-		SinkTaskContext context = mock(SinkTaskContext.class);
-		when(context.assignment()).thenReturn(ImmutableSet.of(new TopicPartition(topic, 1)));
-		this.task.initialize(context);
-		this.task.start(ImmutableMap.<String, String>builder().put(SinkTask.TOPICS_CONFIG, topic)
-				.put(Tile38SinkConnectorConfig.TILE38_URL, host).put(Tile38SinkConnectorConfig.TILE38_PORT, port)
-				.put("tile38.topic.foo", cmdString).build());
+		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
+		config.put("tile38.topic.foo", cmdString);
+		this.task.start(config);
 
 		Schema schema = SchemaBuilder.struct().field("one", Schema.STRING_SCHEMA).field("two", Schema.STRING_SCHEMA)
 				.field("three", Schema.STRING_SCHEMA).build();
-
 		Struct value = new Struct(schema).put("one", one).put("two", two).put("three", three);
 
 		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, one, schema, value));
-
 		Assertions.assertThrows(RedisCommandExecutionException.class, () -> {
 			this.task.put(records);
 		});
 	}
+	
+	private Map<String, String> provideConfig(String topic) {
+		return ImmutableMap.of(SinkTask.TOPICS_CONFIG, topic, 
+				Tile38SinkConnectorConfig.TILE38_URL, host,
+				Tile38SinkConnectorConfig.TILE38_PORT, port, 
+				"tile38.topic.foo", "foo event.id FIELD route event.route POINT event.lat event.lon");
+	}
+	
+	private Schema getRouteSchema() {
+		return SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA).field("route", Schema.STRING_SCHEMA)
+				.field("lat", Schema.STRING_SCHEMA).field("lon", Schema.STRING_SCHEMA).build();
+	}
 
+	private CommandArgs<String, String> getFooCommand(String id) {
+		return getCommand("foo", id);
+	}
+
+	private CommandArgs<String, String> getCommand(String key, String id) {
+		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
+		cmd.add(key);
+		cmd.add(id);
+		return cmd;
+	}
+	
+	private String executeWithFieldsCommand(RedisCommands<String, String> sync, CommandArgs<String, String> cmd) {
+		cmd.add("WITHFIELDS");
+		return sync.dispatch(CommandType.GET, new StatusOutput<>(StringCodec.UTF8), cmd);
+	}
 }
