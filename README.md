@@ -1,6 +1,33 @@
-Welcome to yet another Kafka Connect connector: this time it's a Sink to Tile38 (https://tile38.com/)!
+# Kafka Connect Tile38 Sink Connector
+https://tile38.com/)!
 
-# Run
+## Usage
+
+Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into SET and DELETE queries that are performed against Tile38. Only sinking data is supported.
+
+### Record Formats and Structures
+The following record formats are supported:
+
+* Avro 
+* JSON with Schema
+* Plain JSON
+
+### Topics
+
+Write something about the topic-command configuration. Each configured Kafka Connect Tile38 Connector will only output data into a single database instance.
+
+## Configuration
+
+### Connector Properties
+Name |	Description	| Type	| Default |	Importance | Example
+------------ | ------------- | ------------- | ------------- | ------------- | -------------
+tile38.host	| Tile38 server host. | string | localhost |	high | localhost 
+tile38.port |	Tile38 server host port number. | int | 9851 |	high | 9851
+topics | Kafka topics read by the connector | comma-separated string | | high | foo,bar
+tile38.topic.foo | Example command for foo topic | string | | low | foo event.id FIELD route event.route POINT event.lat event.lon
+tile38.topic.bar | Example command for bar topic | string | | low | anything event.the_key POINT event.latitude event.longitude
+
+# Build and run info
 
 * Build: 'mvn clean package'
 * Launch 'docker-compose up -d'
@@ -14,9 +41,7 @@ Welcome to yet another Kafka Connect connector: this time it's a Sink to Tile38 
 * curl localhost:8083/connectors | jq
 * curl -X DELETE -H "Content-type: application/json" http://localhost:8083/connectors/tile | jq
 
-#TODO
-
-* only works for Json and Avro
+# TODO
 * tombstones/deletes
 * batch insert
 * ssl
