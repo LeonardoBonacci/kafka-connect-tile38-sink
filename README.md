@@ -1,9 +1,8 @@
 # Kafka Connect Tile38 Sink Connector
-https://tile38.com/)!
 
 ## Usage
 
-Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into SET and DELETE queries that are performed against Tile38. Only sinking data is supported.
+Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into SET and DELETE queries that are performed against Tile38. Only sinking data is supported. [Check out Tile38!](https://tile38.com/)
 
 ### Record Formats and Structures
 The following record formats are supported:
