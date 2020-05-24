@@ -34,7 +34,7 @@ public class CommandGeneratorTests {
 		Pair<String, Set<String>> q = new ImmutablePair<>(
 				cmdString, 
 				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
+		Map<String, Object> json = DataConverter.stringToMap(sinkRecord.toString());
 
 		String result = CommandGenerator.from(q).preparedStatement(json);
 	    assertThat(result, is(equalTo("fooid is to be sub foosub and foofoo fooed")));
@@ -53,7 +53,7 @@ public class CommandGeneratorTests {
 		Pair<String, Set<String>> q = new ImmutablePair<>(
 				cmdString, 
 				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
+		Map<String, Object> json = DataConverter.stringToMap(sinkRecord.toString());
 
 		String result = CommandGenerator.from(q).preparedStatement(json);
 	    assertThat(result, is(equalTo("$$ null FIELD POINT %% @@")));
@@ -75,7 +75,7 @@ public class CommandGeneratorTests {
 		Pair<String, Set<String>> q = new ImmutablePair<>(
 				cmdString, 
 				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
+		Map<String, Object> json = DataConverter.stringToMap(sinkRecord.toString());
 
 		String result = CommandGenerator.from(q).compile(json).toCommandString();
 	    assertThat(result, is(equalTo("fooid is to be sub foosub and foofoo fooed")));
@@ -91,7 +91,7 @@ public class CommandGeneratorTests {
 		Pair<String, Set<String>> q = new ImmutablePair<>(
 				cmdString, 
 				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
+		Map<String, Object> json = DataConverter.stringToMap(sinkRecord.toString());
 
 		Assertions.assertThrows(DataException.class, () -> {
 			CommandGenerator.from(q).compile(json);
@@ -113,7 +113,7 @@ public class CommandGeneratorTests {
 		Pair<String, Set<String>> q = new ImmutablePair<>(
 				cmdString, 
 				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
+		Map<String, Object> json = DataConverter.stringToMap(sinkRecord.toString());
 
 		String result = CommandGenerator.from(q).preparedStatement(json);
 		assertThat(result, is(equalTo("foo fooid POINT some foo some bar")));

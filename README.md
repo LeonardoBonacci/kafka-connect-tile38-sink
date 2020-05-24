@@ -16,6 +16,7 @@ Welcome to yet another Kafka Connect connector: this time it's a Sink to Tile38 
 
 #TODO
 
+* only works for Json and Avro
 * tombstones/deletes
 * batch insert
 * ssl

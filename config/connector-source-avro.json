@@ -1,0 +1,19 @@
+{
+  "name": "datagen-test",
+  "config": {
+    "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
+    "kafka.topic": "test",
+
+    "schema.filename": "/tmp/foobar.avro",
+    "schema.keyfield": "id",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://schema-registry:8081",
+
+    "max.interval": 500,
+    "iterations": 1000000,
+
+    "tasks.max": "1"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "tile",
+  "config": {
+    "connector.class": "guru.bonacci.kafka.connect.tile38.Tile38SinkConnector",
+    "topics": "test",
+
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://schema-registry:8081",
+
+    "tile38.topic.test": "test event.id FIELD route event.route POINT event.lat event.lon",
+
+    "tile38.url": "tile38",
+    "tile38.port": 9851,
+
+    "tasks.max": "1"
+  }
+}
