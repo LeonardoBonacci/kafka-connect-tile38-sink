@@ -16,6 +16,8 @@ import org.apache.kafka.connect.sink.SinkRecord;
 
 import com.google.common.collect.ImmutableMap;
 
+import guru.bonacci.kafka.connect.tile38.writer.RecordConverter;
+import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,7 +37,7 @@ class EventBuilder {
         return this;
     }
 
-    Map<String, List<InternalSinkRecord>> build() { 
+    Map<String, List<Tile38Record>> build() { 
     	if (topics.isEmpty() || sinkRecords.isEmpty()) {
 			return ImmutableMap.of();
     	}
@@ -54,10 +56,10 @@ class EventBuilder {
         });
 
     	// ..and convert the records to internal sink records
-        Map<String, List<InternalSinkRecord>> interalsByTopic = 
+        Map<String, List<Tile38Record>> interalsByTopic = 
         		transformValues(recordsByTopic, sinkRecords -> {
 	        return sinkRecords.stream()
-	                .map(DataConverter::toInternalSinkRecord)
+	                .map(RecordConverter::toInternalSinkRecord)
 	                .collect(toList());
 	        }
         );

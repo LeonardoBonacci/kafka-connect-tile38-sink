@@ -11,6 +11,8 @@ import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkConnector;
 
+import guru.bonacci.kafka.connect.tile38.config.Tile38SinkConnectorConfig;
+
 public class Tile38SinkConnector extends SinkConnector {
 
 	private Map<String, String> configProperties;

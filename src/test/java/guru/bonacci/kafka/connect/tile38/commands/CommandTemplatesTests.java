@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.commands;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -10,12 +10,14 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
+import guru.bonacci.kafka.connect.tile38.config.TopicsConfigTests;
+
 
 public class CommandTemplatesTests {
 
 	@Test
 	void commandArgs() {
-		CommandTemplates cmds = CommandTemplates.from(TopicsTests.provideTopics());
+		CommandTemplates cmds = CommandTemplates.from(TopicsConfigTests.provideTopics());
 
 	    assertThat(cmds.configuredTopics().count(), is(2l));
 

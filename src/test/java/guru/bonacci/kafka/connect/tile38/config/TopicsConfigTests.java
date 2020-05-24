@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.config;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
@@ -12,10 +12,12 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-class TopicsTests {
+import guru.bonacci.kafka.connect.tile38.config.TopicsConfig;
 
-	static Topics provideTopics() {
-		return Topics.from(ImmutableMap.of(
+public class TopicsConfigTests {
+
+	public static TopicsConfig provideTopics() {
+		return TopicsConfig.from(ImmutableMap.of(
 				"key.converter", "org.apache.kafka.connect.storage.StringConverter", 
 				"value.converter", "org.apache.kafka.connect.storage.StringConverter", 
 			    "topics", "foo,bar",
@@ -25,7 +27,7 @@ class TopicsTests {
 
 	@Test
 	void filterByPrefix() {
-		Topics topics = provideTopics();
+		TopicsConfig topics = provideTopics();
 		Set<String> configuredTopics = topics.configuredTopics();
 	    assertThat(configuredTopics, hasSize(2));
 

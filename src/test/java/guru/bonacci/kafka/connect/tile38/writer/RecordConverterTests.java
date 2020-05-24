@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.writer;
 
 import static com.github.jcustenborder.kafka.connect.utils.SinkRecordHelper.write;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -16,8 +16,11 @@ import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import guru.bonacci.kafka.connect.tile38.writer.RecordConverter;
+import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
 
-public class DataConverterTests {
+
+public class RecordConverterTests {
 
 	@Test
 	void convert() {
@@ -28,7 +31,7 @@ public class DataConverterTests {
 		SinkRecord rec = write("unused", Schema.STRING_SCHEMA, "id", schema, value);
 		final Struct recStruct = (Struct)rec.value();
 		
-		InternalSinkRecord intRec = DataConverter.toInternalSinkRecord(rec);
+		Tile38Record intRec = RecordConverter.toInternalSinkRecord(rec);
 		final Map<String, Object> intRecMap = intRec.getValue();
 
 		intRecMap.keySet().forEach(key -> {
@@ -51,7 +54,7 @@ public class DataConverterTests {
 		SinkRecord rec = write("unused", Schema.STRING_SCHEMA, "id", schema, value);
 		final Struct recStruct = (Struct)rec.value();
 		
-		InternalSinkRecord intRec = DataConverter.toInternalSinkRecord(rec);
+		Tile38Record intRec = RecordConverter.toInternalSinkRecord(rec);
 		final Map<String, Object> intRecMap = intRec.getValue();
 
 		assertThat(intRecMap.get("id"), is(equalTo(recStruct.getString("id"))));
@@ -66,7 +69,7 @@ public class DataConverterTests {
 	@Test
 	void unacceptedStructString() {
 		Assertions.assertThrows(DataException.class, () -> {
-			DataConverter.stringToMap("Struct{id=Gold,route=66,lat=12.11,lon=66.8}");
+			RecordConverter.stringToMap("Struct{id=Gold,route=66,lat=12.11,lon=66.8}");
 		});
 	}
 
@@ -80,7 +83,7 @@ public class DataConverterTests {
 		SinkRecord rec = write("unused", Schema.STRING_SCHEMA, "foo", schema, value);
 
 		Assertions.assertThrows(DataException.class, () -> {
-			DataConverter.toInternalSinkRecord(rec);
+			RecordConverter.toInternalSinkRecord(rec);
 		});
 	}
 }

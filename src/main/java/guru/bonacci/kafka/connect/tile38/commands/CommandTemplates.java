@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.commands;
 
 import static com.google.common.collect.Maps.immutableEntry;
 import static com.google.common.collect.Sets.newHashSet;
@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import guru.bonacci.kafka.connect.tile38.config.TopicsConfig;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,15 +37,15 @@ public class CommandTemplates {
 		.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
-	Stream<String> configuredTopics() {
+	public Stream<String> configuredTopics() {
 		return commands.keySet().stream();
 	}
 
-	Pair<String, Set<String>> commandForTopic(String topic) {
+	public Pair<String, Set<String>> commandForTopic(String topic) {
 		return commands.get(topic);
 	}
 	
-	static CommandTemplates from(Topics topics) {
+	public static CommandTemplates from(TopicsConfig topics) {
 		return new CommandTemplates(topics.getCmdsByTopic());
 	}
 }

@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.config;
 
 import static com.google.common.collect.Sets.symmetricDifference;
 import static java.lang.String.format;
@@ -14,7 +14,12 @@ import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
+
+import guru.bonacci.kafka.connect.tile38.commands.CommandTemplates;
+
 import org.apache.kafka.common.config.ConfigException;
+
+import lombok.Getter;
 
 
 public class Tile38SinkConnectorConfig extends AbstractConfig {
@@ -25,8 +30,8 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	public static final String TILE38_PORT = "tile38.port";
 	private static final String TILE38_PORT_DOC = "Tile38 port to connect.";
 
-	Topics topics;
-	CommandTemplates cmdTemplates;
+	@Getter	TopicsConfig topicsConfig;
+	@Getter	CommandTemplates cmdTemplates;
 
 	
 	public Tile38SinkConnectorConfig(Map<String, String> props) {
@@ -36,8 +41,8 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	public Tile38SinkConnectorConfig(ConfigDef config, Map<String, String> props) {
 		super(config, props);
 		
-		topics = Topics.from(props); 
-		cmdTemplates = CommandTemplates.from(topics);
+		topicsConfig = TopicsConfig.from(props); 
+		cmdTemplates = CommandTemplates.from(topicsConfig);
 
 		validateConfiguredTopics(props);
 	}
@@ -47,7 +52,7 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 				? stream((props.get(TOPICS_CONFIG).trim()).split(",")).map(String::trim).collect(toSet()) 
 				: emptySet();
 				 
-        Set<String> configuredTopics = this.topics.configuredTopics();
+        Set<String> configuredTopics = this.topicsConfig.configuredTopics();
 
         if (!symmetricDifference(topics, configuredTopics).isEmpty()) {
             throw new ConfigException(format("There is a mismatch between topics defined into the property 'topics' %s and configured topics %s", 

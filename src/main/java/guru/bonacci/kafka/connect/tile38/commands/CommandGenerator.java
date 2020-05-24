@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.commands;
 
 import static guru.bonacci.kafka.connect.tile38.Constants.TOKERATOR;
 import static io.lettuce.core.codec.StringCodec.UTF8;
@@ -29,7 +29,7 @@ public class CommandGenerator {
 	private final Pair<String, Set<String>> cmd;
 
 	
-	CommandArgs<String, String> compile(Map<String, Object> json) {
+	public CommandArgs<String, String> compile(Map<String, Object> json) {
 		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
 		asList(preparedStatement(json).split(" ")).forEach(cmd::add);
 		
@@ -62,7 +62,7 @@ public class CommandGenerator {
 		return result;
 	}
 	
-	static CommandGenerator from(Pair<String, Set<String>> cmd) {
+	public static CommandGenerator from(Pair<String, Set<String>> cmd) {
 		cmd.getRight().removeIf(s -> !s.startsWith(TOKERATOR));
 		return new CommandGenerator(cmd);
 	}

@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.config;
 
 import static guru.bonacci.kafka.connect.tile38.Constants.COMMAND_PREFIX;
 import static java.util.stream.Collectors.toMap;
@@ -17,18 +17,18 @@ import lombok.ToString;
 @Getter
 @ToString
 @RequiredArgsConstructor(access = PRIVATE)
-class Topics {
+public class TopicsConfig {
 
 	private final Map<String, String> cmdsByTopic;
 
 	
-	Set<String> configuredTopics() {
+	public Set<String> configuredTopics() {
 		return cmdsByTopic.keySet();
 	}
 
-	static Topics from(Map<String, String> config) {
+	public static TopicsConfig from(Map<String, String> config) {
 		// Filter and remove the prefix from the topic config keys
-		return new Topics(config.entrySet().stream()
+		return new TopicsConfig(config.entrySet().stream()
 				.filter(prop -> prop.getKey().startsWith(COMMAND_PREFIX))
 				.collect(toMap(k -> k.getKey().replace(COMMAND_PREFIX, ""), 
 			                   v -> v.getValue())));

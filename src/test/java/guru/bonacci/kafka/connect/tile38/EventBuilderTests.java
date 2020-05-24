@@ -19,12 +19,14 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
+
 
 public class EventBuilderTests {
 
 	@Test
 	void buildNothing() {
-		Map<String, List<InternalSinkRecord>> result = 
+		Map<String, List<Tile38Record>> result = 
 				new EventBuilder().build();
 		
 		assertThat(result, is(anEmptyMap()));
@@ -32,7 +34,7 @@ public class EventBuilderTests {
 
 	@Test
 	void buildWithoutTopic() {
-		Map<String, List<InternalSinkRecord>> result = 
+		Map<String, List<Tile38Record>> result = 
 				new EventBuilder()
 						.withSinkRecords(recordsProvider())
 						.build();
@@ -42,7 +44,7 @@ public class EventBuilderTests {
 
 	@Test
 	void build() {
-		Map<String, List<InternalSinkRecord>> result = 
+		Map<String, List<Tile38Record>> result = 
 				new EventBuilder()
 						.withTopics(ImmutableSet.of("t1","t2"))
 						.withSinkRecords(recordsProvider())

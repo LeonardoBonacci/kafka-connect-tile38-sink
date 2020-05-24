@@ -9,6 +9,9 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 
+import guru.bonacci.kafka.connect.tile38.config.Tile38SinkConnectorConfig;
+import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
+import guru.bonacci.kafka.connect.tile38.writer.Tile38Writer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Tile38SinkTask extends SinkTask {
 
 	private Tile38SinkConnectorConfig config;
-	private Tile38Service service;
+	private Tile38Writer service;
 
 	
 	@Override
@@ -30,7 +33,7 @@ public class Tile38SinkTask extends SinkTask {
 		log.info("Starting Tile38SinkTask");
 
 		this.config = new Tile38SinkConnectorConfig(props);
-		this.service = new Tile38Service(config);
+		this.service = new Tile38Writer(config);
 	}
 
 	@Override
@@ -41,8 +44,8 @@ public class Tile38SinkTask extends SinkTask {
 			return;
 		}
 
-		Map<String, List<InternalSinkRecord>> data = new EventBuilder()
-				.withTopics(config.topics.configuredTopics())
+		Map<String, List<Tile38Record>> data = new EventBuilder()
+				.withTopics(config.getTopicsConfig().configuredTopics())
 				.withSinkRecords(records)
 				.build();
 

@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.writer;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -18,7 +18,7 @@ import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DataConverter {
+public class RecordConverter {
 
 	private static final Converter JSON_CONVERTER;
 
@@ -28,8 +28,8 @@ public class DataConverter {
 	}
 
 	
-	static InternalSinkRecord toInternalSinkRecord(SinkRecord sinkRecord) {
-		return new InternalSinkRecord(convertData(sinkRecord));
+	public static Tile38Record toInternalSinkRecord(SinkRecord sinkRecord) {
+		return new Tile38Record(convertData(sinkRecord));
 	}
 
 	private static Map<String, Object> convertData(SinkRecord record) {
@@ -38,7 +38,7 @@ public class DataConverter {
 
 	// visible for testing
 	@SuppressWarnings("unchecked")
-	static Map<String, Object> stringToMap(String recordAsString) {
+	public static Map<String, Object> stringToMap(String recordAsString) {
 		try {
 			return new Gson().fromJson(recordAsString, Map.class);
 		} catch (JsonSyntaxException e) {

@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.commands;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -14,11 +14,11 @@ public class CommandGenerators {
 	private final Map<String, CommandGenerator> cmds;
 	
 
-	CommandGenerator by(String topic) {
+	public CommandGenerator by(String topic) {
 		return cmds.get(topic);
 	}
 	
-	static CommandGenerators from(Map<String, CommandGenerator> cmds) {
+	public static CommandGenerators from(Map<String, CommandGenerator> cmds) {
 		if (cmds == null)
 			cmds = ImmutableMap.of();
 

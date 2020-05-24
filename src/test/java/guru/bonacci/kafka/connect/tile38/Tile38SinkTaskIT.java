@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonParser;
 
+import guru.bonacci.kafka.connect.tile38.config.Tile38SinkConnectorConfig;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.StatusOutput;

@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38;
+package guru.bonacci.kafka.connect.tile38.writer;
 
 import java.util.Map;
 
@@ -9,7 +9,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @RequiredArgsConstructor
-class InternalSinkRecord {
+public class Tile38Record {
 
 	private final Map<String, Object> value;
 }
