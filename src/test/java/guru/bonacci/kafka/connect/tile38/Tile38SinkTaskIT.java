@@ -42,12 +42,13 @@ import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
 
 /**
- * Sending plain Redis to Tile38 these are some commands:
+ * Sending plain Redis to Tile38 these some commands are:
  * SET foo fooid FIELD route 12.3 POINT 4.56 7.89
  * GET foo fooid -> {"type":"Point","coordinates":[7.89,4.56]}
  * GET foo fooid WITHFIELDS -> {"type":"Point","coordinates":[7.89,4.56]},"fields":{"route":12.3}
  * 
- * For reasons I have yet to comprehend the WITHFIELD variant returns only the 'fields' using Lettuce.
+ * For reasons I have yet to comprehend the WITHFIELD variant returns only the 'fields' using Lettuce, 
+ * while the entire object is present..
  */
 @Testcontainers
 public class Tile38SinkTaskIT {
@@ -145,6 +146,34 @@ public class Tile38SinkTaskIT {
 
 		resp = executeWithFieldsCommand(sync, get);
 		assertThat(resp, is(equalTo(route)));
+	}
+
+	public void nestedWrite() {
+		final String lat = "4.56", lon = "7.89";
+	    final String topic = "foo";
+
+		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
+		config.put("tile38.topic.foo", "foo event.id POINT event.nested.lat event.nested.lon");
+		this.task.start(config);
+
+		final String id = "fooid";
+
+		Schema nestedSchema = SchemaBuilder.struct()
+				.field("lat", Schema.STRING_SCHEMA)
+				.field("lon", Schema.STRING_SCHEMA).build();
+		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA)
+				.field("nested", nestedSchema);
+
+		Struct nestedValue = new Struct(nestedSchema).put("lat", lat).put("lon", lon);
+		Struct value = new Struct(schema).put("id", id).put("nested", nestedValue);
+
+		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, id, schema, value));
+		this.task.put(records);
+
+		RedisCommands<String, String> sync = this.task.getService().getSync();
+		CommandArgs<String, String> get = getFooCommand(id);
+		String resp = sync.dispatch(CommandType.GET, new StatusOutput<>(StringCodec.UTF8), get);
+		assertThat(parser.parse(resp), is(equalTo(parser.parse(String.format(RESULT_STRING, lon, lat)))));
 	}
 
 	private static Stream<Arguments> provideInputForInvalidWrite() {

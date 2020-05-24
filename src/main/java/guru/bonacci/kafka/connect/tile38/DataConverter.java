@@ -1,9 +1,10 @@
 package guru.bonacci.kafka.connect.tile38;
 
-import static java.util.Collections.singletonMap;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.singletonMap;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.json.JsonConverter;
@@ -26,11 +27,14 @@ public class DataConverter {
 		return new InternalSinkRecord(convertData(sinkRecord));
 	}
 
-	@SuppressWarnings("unchecked")
-	private static Map<String, String> convertData(SinkRecord record) {
-		String recordAsString = getPayload(record);
-		return new Gson().fromJson(recordAsString, Map.class);
+	private static Map<String, Object> convertData(SinkRecord record) {
+		return stringToMap.apply(getPayload(record));
 	}
+
+	// visible for testing
+	@SuppressWarnings("unchecked")
+	static Function<String, Map<String, Object>> stringToMap = 
+		recordAsString -> new Gson().fromJson(recordAsString, Map.class);
 
 	private static String getPayload(SinkRecord record) {
 		if (record.value() == null) {

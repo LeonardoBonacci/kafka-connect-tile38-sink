@@ -29,7 +29,7 @@ public class CommandGenerator {
 	private final Pair<String, Set<String>> cmd;
 
 	
-	CommandArgs<String, String> compile(Map<String, String> json) {
+	CommandArgs<String, String> compile(Map<String, Object> json) {
 		CommandArgs<String, String> cmd = new CommandArgs<>(UTF8);
 		asList(preparedStatement(json).split(" ")).forEach(cmd::add);
 		
@@ -38,7 +38,7 @@ public class CommandGenerator {
 	}
 
 	// visible for testing
-	String preparedStatement(Map<String, String> json) {
+	String preparedStatement(Map<String, Object> json) {
 		Stream<String> events = cmd.getRight().stream();
 		Map<String, String> parsed = events.collect(toMap(identity(), ev -> {
 			try {

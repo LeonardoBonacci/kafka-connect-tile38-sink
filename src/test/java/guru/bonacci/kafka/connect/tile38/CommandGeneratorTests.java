@@ -1,6 +1,7 @@
 package guru.bonacci.kafka.connect.tile38;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import java.util.Map;
@@ -13,10 +14,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-@SuppressWarnings("unchecked")
 public class CommandGeneratorTests {
 
 	@Test
@@ -35,10 +34,10 @@ public class CommandGeneratorTests {
 		Pair<String, Set<String>> q = new ImmutablePair<>(
 				cmdString, 
 				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
+		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
 
 		String result = CommandGenerator.from(q).preparedStatement(json);
-	    assertThat(result, is("fooid is to be sub foosub and foofoo fooed"));
+	    assertThat(result, is(equalTo("fooid is to be sub foosub and foofoo fooed")));
 	}
 
 	@Test
@@ -54,10 +53,10 @@ public class CommandGeneratorTests {
 		Pair<String, Set<String>> q = new ImmutablePair<>(
 				cmdString, 
 				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
+		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
 
 		String result = CommandGenerator.from(q).preparedStatement(json);
-	    assertThat(result, is("$$ null FIELD POINT %% @@"));
+	    assertThat(result, is(equalTo("$$ null FIELD POINT %% @@")));
 	}
 
 	@Test
@@ -76,10 +75,10 @@ public class CommandGeneratorTests {
 		Pair<String, Set<String>> q = new ImmutablePair<>(
 				cmdString, 
 				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
+		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
 
 		String result = CommandGenerator.from(q).compile(json).toCommandString();
-	    assertThat(result, is("fooid is to be sub foosub and foofoo fooed"));
+	    assertThat(result, is(equalTo("fooid is to be sub foosub and foofoo fooed")));
 	}
 	
 	@Test
@@ -92,11 +91,32 @@ public class CommandGeneratorTests {
 		Pair<String, Set<String>> q = new ImmutablePair<>(
 				cmdString, 
 				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, String> json = new Gson().fromJson(sinkRecord.toString(), Map.class);
+		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
 
 		Assertions.assertThrows(DataException.class, () -> {
 			CommandGenerator.from(q).compile(json);
 		});
+	}
+
+	@Test
+	void nesting() {
+		final String cmdString = "foo event.id POINT event.nested.foo event.nested.bar";
+
+		JsonObject nestedRecord = new JsonObject();
+		nestedRecord.addProperty("foo", "some foo");
+		nestedRecord.addProperty("bar", "some bar");
+
+		JsonObject sinkRecord = new JsonObject();
+		sinkRecord.addProperty("id", "fooid");
+		sinkRecord.add("nested", nestedRecord);
+		
+		Pair<String, Set<String>> q = new ImmutablePair<>(
+				cmdString, 
+				Sets.newHashSet(cmdString.split(" ")));
+		Map<String, Object> json = DataConverter.stringToMap.apply(sinkRecord.toString());
+
+		String result = CommandGenerator.from(q).preparedStatement(json);
+		assertThat(result, is(equalTo("foo fooid POINT some foo some bar")));
 	}
 
 }

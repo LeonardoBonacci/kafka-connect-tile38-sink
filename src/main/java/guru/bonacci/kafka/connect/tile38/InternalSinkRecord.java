@@ -11,6 +11,5 @@ import lombok.ToString;
 @RequiredArgsConstructor
 class InternalSinkRecord {
 
-	//TODO <String,Object> for nesting?
-	private final Map<String, String> value;
+	private final Map<String, Object> value;
 }
