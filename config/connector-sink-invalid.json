@@ -10,7 +10,7 @@
 
     "tile38.topic.foo": "I am invalid",
 
-    "tile38.url": "tile38",
+    "tile38.host": "tile38",
     "tile38.port": 9851,
     "tasks.max": "1"
   }

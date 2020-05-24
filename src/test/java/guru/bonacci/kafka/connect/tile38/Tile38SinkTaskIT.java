@@ -264,7 +264,7 @@ public class Tile38SinkTaskIT {
 	
 	private Map<String, String> provideConfig(String topic) {
 		return ImmutableMap.of(SinkTask.TOPICS_CONFIG, topic, 
-				Tile38SinkConnectorConfig.TILE38_URL, host,
+				Tile38SinkConnectorConfig.TILE38_HOST, host,
 				Tile38SinkConnectorConfig.TILE38_PORT, port, 
 				"tile38.topic.foo", "foo event.id FIELD route event.route POINT event.lat event.lon");
 	}

@@ -9,7 +9,7 @@
 
     "tile38.topic.asstring": "asstring event.id FIELD route event.route POINT event.lat event.lon",
 
-    "tile38.url": "tile38",
+    "tile38.host": "tile38",
     "tile38.port": 9851,
 
     "tasks.max": "1"

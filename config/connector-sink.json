@@ -11,7 +11,7 @@
     "tile38.topic.foo": "foo event.id FIELD route event.route POINT event.lat event.lon",
     "tile38.topic.bar": "bar event.id FIELD route event.route POINT event.lat event.lon",
 
-    "tile38.url": "tile38",
+    "tile38.host": "tile38",
     "tile38.port": 9851,
 
     "tasks.max": "1"

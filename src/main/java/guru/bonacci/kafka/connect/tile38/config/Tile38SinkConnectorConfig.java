@@ -24,8 +24,8 @@ import lombok.Getter;
 
 public class Tile38SinkConnectorConfig extends AbstractConfig {
 
-	public static final String TILE38_URL = "tile38.url";
-	private static final String TILE38_URL_DOC = "Tile38 server host.";
+	public static final String TILE38_HOST = "tile38.host";
+	private static final String TILE38_HOST_DOC = "Tile38 server host.";
 	public static final String TILE38_PORT = "tile38.port";
 	private static final String TILE38_PORT_DOC = "Tile38 server host port number.";
 
@@ -61,12 +61,12 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	
 	public static ConfigDef conf() {
 		return new ConfigDef()
-				.define(TILE38_URL, Type.STRING, "localhost", Importance.HIGH, TILE38_URL_DOC)
+				.define(TILE38_HOST, Type.STRING, "localhost", Importance.HIGH, TILE38_HOST_DOC)
 				.define(TILE38_PORT, Type.INT, 9851, Importance.HIGH, TILE38_PORT_DOC);
 	}
 
 	public String getTile38Url() {
-		return this.getString(TILE38_URL);
+		return this.getString(TILE38_HOST);
 	}
 
 	public Integer getTile38Port() {
