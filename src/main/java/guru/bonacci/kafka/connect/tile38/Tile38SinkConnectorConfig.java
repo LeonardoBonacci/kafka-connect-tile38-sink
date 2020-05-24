@@ -1,5 +1,6 @@
 package guru.bonacci.kafka.connect.tile38;
 
+import static com.google.common.collect.Sets.symmetricDifference;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
@@ -15,7 +16,6 @@ import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
 import org.apache.kafka.common.config.ConfigException;
 
-import com.google.common.collect.Sets;
 
 public class Tile38SinkConnectorConfig extends AbstractConfig {
 
@@ -49,7 +49,7 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 				 
         Set<String> configuredTopics = this.topics.configuredTopics();
 
-        if (!Sets.symmetricDifference(topics, configuredTopics).isEmpty()) {
+        if (!symmetricDifference(topics, configuredTopics).isEmpty()) {
             throw new ConfigException(format("There is a mismatch between topics defined into the property 'topics' %s and configured topics %s", 
             		topics, configuredTopics));
         }
