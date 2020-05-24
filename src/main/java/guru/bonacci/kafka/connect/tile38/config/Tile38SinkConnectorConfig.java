@@ -24,11 +24,10 @@ import lombok.Getter;
 
 public class Tile38SinkConnectorConfig extends AbstractConfig {
 
-	//TODO connect to multiple hosts?
 	public static final String TILE38_URL = "tile38.url";
-	private static final String TILE38_URL_DOC = "Tile38 URL to connect.";
+	private static final String TILE38_URL_DOC = "Tile38 server host.";
 	public static final String TILE38_PORT = "tile38.port";
-	private static final String TILE38_PORT_DOC = "Tile38 port to connect.";
+	private static final String TILE38_PORT_DOC = "Tile38 server host port number.";
 
 	@Getter	TopicsConfig topicsConfig;
 	@Getter	CommandTemplates cmdTemplates;
@@ -62,8 +61,8 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	
 	public static ConfigDef conf() {
 		return new ConfigDef()
-				.define(TILE38_URL, Type.STRING, Importance.HIGH, TILE38_URL_DOC)
-				.define(TILE38_PORT, Type.INT, Importance.HIGH, TILE38_PORT_DOC);
+				.define(TILE38_URL, Type.STRING, "localhost", Importance.HIGH, TILE38_URL_DOC)
+				.define(TILE38_PORT, Type.INT, 9851, Importance.HIGH, TILE38_PORT_DOC);
 	}
 
 	public String getTile38Url() {
