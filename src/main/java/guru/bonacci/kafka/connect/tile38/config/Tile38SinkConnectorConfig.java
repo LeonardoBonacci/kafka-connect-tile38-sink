@@ -65,11 +65,11 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 				.define(TILE38_PORT, Type.INT, 9851, Importance.HIGH, TILE38_PORT_DOC);
 	}
 
-	public String getTile38Url() {
+	public String getHost() {
 		return this.getString(TILE38_HOST);
 	}
 
-	public Integer getTile38Port() {
+	public Integer getPort() {
 		return this.getInt(TILE38_PORT);
 	}
 }

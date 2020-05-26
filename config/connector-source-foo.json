@@ -1,5 +1,5 @@
 {
-  "name": "datagen-foo",
+  "name": "foo",
   "config": {
     "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
     "kafka.topic": "foo",
@@ -11,8 +11,8 @@
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "false",
 
-    "max.interval": 500,
-    "iterations": 1000000,
+    "max.interval": 5,
+    "iterations": 10000000,
 
     "tasks.max": "1"
   }
