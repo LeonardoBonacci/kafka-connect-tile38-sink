@@ -16,11 +16,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Getter
 public class Tile38SinkTask extends SinkTask {
 
 	private Tile38SinkConnectorConfig config;
-	private Tile38Writer service;
+	@Getter private Tile38Writer writer; // for testing
 
 	
 	@Override
@@ -33,7 +32,7 @@ public class Tile38SinkTask extends SinkTask {
 		log.info("Starting Tile38SinkTask");
 
 		this.config = new Tile38SinkConnectorConfig(props);
-		this.service = new Tile38Writer(config);
+		this.writer = new Tile38Writer(config);
 	}
 
 	@Override
@@ -49,7 +48,7 @@ public class Tile38SinkTask extends SinkTask {
 				.withSinkRecords(records)
 				.build();
 
-		service.writeData(data);
+		writer.writeData(data);
 	}
 
 	@Override
@@ -66,8 +65,8 @@ public class Tile38SinkTask extends SinkTask {
 	public void stop() {
 		log.info("Stopping Tile38SinkTask");
 		
-		if (service != null) {
-			service.close();
+		if (writer != null) {
+			writer.close();
 		}
 	}
 }

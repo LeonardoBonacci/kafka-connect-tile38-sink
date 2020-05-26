@@ -7,7 +7,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.kafka.common.record.TimestampType;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 
 import guru.bonacci.kafka.connect.tile38.writer.RecordConverter;
 import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
+import io.lettuce.core.output.CommandOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
 
@@ -80,7 +81,7 @@ public class CommandGeneratorTests {
 
 		Tile38Record internalRecord = new RecordConverter().convert(rec);
 
-		Pair<CommandType, CommandArgs<String, String>> result = CommandGenerator.from(
+		Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> result = CommandGenerator.from(
 				CommandWrapper.from(cmdString)).compile(internalRecord);
 
 	    assertThat(result.getLeft(), is(equalTo(CommandType.SET)));
@@ -106,7 +107,7 @@ public class CommandGeneratorTests {
 
 		Tile38Record internalRecord = new RecordConverter().convert(rec);
 
-		Pair<CommandType, CommandArgs<String, String>> result = CommandGenerator.from(
+		Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> result = CommandGenerator.from(
 				CommandWrapper.from(cmdString)).compile(internalRecord);
 
 	    assertThat(result.getLeft(), is(equalTo(CommandType.DEL)));

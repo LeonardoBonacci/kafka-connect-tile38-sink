@@ -140,7 +140,7 @@ public class Tile38SinkTaskIT {
 		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, id, schema, value));
 		this.task.put(records);
 
-		RedisCommands<String, String> sync = this.task.getService().getSync();
+		RedisCommands<String, String> sync = this.task.getWriter().getClient().connect().sync();
 		CommandArgs<String, String> get = getFooCommand(id);
 		String resp = sync.dispatch(CommandType.GET, new StatusOutput<>(StringCodec.UTF8), get);
 		assertThat(parser.parse(resp), is(equalTo(parser.parse(String.format(RESULT_STRING, lon, lat)))));
@@ -171,7 +171,7 @@ public class Tile38SinkTaskIT {
 		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, id, schema, value));
 		this.task.put(records);
 
-		RedisCommands<String, String> sync = this.task.getService().getSync();
+		RedisCommands<String, String> sync = this.task.getWriter().getClient().connect().sync();
 		CommandArgs<String, String> get = getFooCommand(id);
 		String resp = sync.dispatch(CommandType.GET, new StatusOutput<>(StringCodec.UTF8), get);
 		assertThat(parser.parse(resp), is(equalTo(parser.parse(String.format(RESULT_STRING, lon, lat)))));
@@ -227,7 +227,7 @@ public class Tile38SinkTaskIT {
 		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, id, schema, value));
 		this.task.put(records);
 
-		RedisCommands<String, String> sync = this.task.getService().getSync();
+		RedisCommands<String, String> sync = this.task.getWriter().getClient().connect().sync();
 		CommandArgs<String, String> getCmd = getFooCommand(id);
 		String resp = executeWithFieldsCommand(sync, getCmd);
 

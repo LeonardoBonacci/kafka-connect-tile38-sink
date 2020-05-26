@@ -1,22 +1,25 @@
 package guru.bonacci.kafka.connect.tile38.commands;
 
 import static guru.bonacci.kafka.connect.tile38.Constants.TOKERATOR;
+import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
 import static java.util.regex.Matcher.quoteReplacement;
 import static java.util.stream.Collectors.toMap;
 import static lombok.AccessLevel.PRIVATE;
-import static io.lettuce.core.codec.StringCodec.UTF8;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.kafka.connect.errors.DataException;
 
 import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
+import io.lettuce.core.output.CommandOutput;
+import io.lettuce.core.output.IntegerOutput;
+import io.lettuce.core.output.StatusOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +32,7 @@ public class CommandGenerator {
 	private final CommandWrapper cmd;
 
 	
-	public Pair<CommandType, CommandArgs<String, String>> compile(Tile38Record record) {
+	public Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> compile(Tile38Record record) {
 		CommandArgs<String, String> cmdArgs = new CommandArgs<>(UTF8);
 
 		// tombstone message are deleted
@@ -38,13 +41,13 @@ public class CommandGenerator {
 			cmdArgs.add(record.getKey());
 
 			log.info("Compiled to: {} {}", CommandType.DEL.toString(), cmdArgs.toCommandString());
-			return Pair.of(CommandType.DEL, cmdArgs);
+			return Triple.of(CommandType.DEL, new IntegerOutput<>(UTF8), cmdArgs);
 		} 
 			
 		asList(preparedStatement(record.getValue()).split(" ")).forEach(cmdArgs::add);
 		
 		log.info("Compiled to: {} {}", CommandType.SET, cmdArgs.toCommandString());
-	    return Pair.of(CommandType.SET, cmdArgs);
+	    return Triple.of(CommandType.SET, new StatusOutput<>(UTF8), cmdArgs);
 	}
 
 	// visible for testing
