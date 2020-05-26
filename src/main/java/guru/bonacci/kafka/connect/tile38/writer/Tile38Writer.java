@@ -1,9 +1,9 @@
 package guru.bonacci.kafka.connect.tile38.writer;
 
 import static guru.bonacci.kafka.connect.tile38.commands.CommandGenerator.from;
+import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static io.lettuce.core.codec.StringCodec.UTF8;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +17,7 @@ import guru.bonacci.kafka.connect.tile38.config.Tile38SinkConnectorConfig;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisCommandExecutionException;
 import io.lettuce.core.api.sync.RedisCommands;
+import io.lettuce.core.output.IntegerOutput;
 import io.lettuce.core.output.StatusOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
@@ -42,14 +43,20 @@ public class Tile38Writer {
 				.collect(toMap(identity(), topic -> from(cmdTemplates.commandForTopic(topic)))));
     }
 
-	// DEL fleet truck1
     void writeForTopic(String topic, List<Tile38Record> events) {
     	events.forEach(event -> {
     		Pair<CommandType, CommandArgs<String, String>> cmd = cmds.by(topic).compile(event);
 			
 			try {
-				String resp = sync.dispatch(cmd.getLeft(), new StatusOutput<>(UTF8), cmd.getRight());
-				log.debug("tile38 answers {}", resp);
+				// due to a not-too-beautiful lettuce design 'set' and 'del' have different command outputs
+				// since this will be re-written in batch and async mode we leave this if-else for now
+				if (cmd.getLeft() == CommandType.SET) {
+					String resp = sync.dispatch(cmd.getLeft(), new StatusOutput<>(UTF8), cmd.getRight());
+					log.info("tile38 answers to set {}", resp);
+				} else {
+					Long resp = sync.dispatch(cmd.getLeft(), new IntegerOutput<>(UTF8), cmd.getRight());
+					log.info("tile38 answers to del {}", resp);
+				}
 			} catch (RedisCommandExecutionException e) {
                 log.warn("Exception {} while executing query: {}, with data: {}", e.getMessage(), cmd.getRight().toCommandString(), event.getValue());
 				throw new ConnectException(e);

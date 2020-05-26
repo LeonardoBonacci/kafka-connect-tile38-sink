@@ -37,13 +37,13 @@ public class CommandGenerator {
 			cmdArgs.add(cmd.getKey());
 			cmdArgs.add(record.getKey());
 
-			log.debug("Compiled to: {}", cmdArgs.toCommandString());
+			log.info("Compiled to: {} {}", CommandType.DEL.toString(), cmdArgs.toCommandString());
 			return Pair.of(CommandType.DEL, cmdArgs);
 		} 
 			
 		asList(preparedStatement(record.getValue()).split(" ")).forEach(cmdArgs::add);
 		
-		log.debug("Compiled to: {}", cmdArgs.toCommandString());
+		log.info("Compiled to: {} {}", CommandType.SET, cmdArgs.toCommandString());
 	    return Pair.of(CommandType.SET, cmdArgs);
 	}
 
