@@ -3,10 +3,12 @@ package guru.bonacci.kafka.connect.tile38.writer;
 import static guru.bonacci.kafka.connect.tile38.commands.CommandGenerator.from;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static io.lettuce.core.codec.StringCodec.UTF8;
 
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.connect.errors.ConnectException;
 
 import guru.bonacci.kafka.connect.tile38.commands.CommandGenerators;
@@ -15,7 +17,6 @@ import guru.bonacci.kafka.connect.tile38.config.Tile38SinkConnectorConfig;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisCommandExecutionException;
 import io.lettuce.core.api.sync.RedisCommands;
-import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.output.StatusOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
@@ -41,15 +42,16 @@ public class Tile38Writer {
 				.collect(toMap(identity(), topic -> from(cmdTemplates.commandForTopic(topic)))));
     }
 
+	// DEL fleet truck1
     void writeForTopic(String topic, List<Tile38Record> events) {
     	events.forEach(event -> {
-    		CommandArgs<String, String> cmd = cmds.by(topic).compile(event.getValue());
+    		Pair<CommandType, CommandArgs<String, String>> cmd = cmds.by(topic).compile(event);
 			
 			try {
-				String resp = sync.dispatch(CommandType.SET, new StatusOutput<>(StringCodec.UTF8), cmd);
-				log.info("tile38 answers {}", resp);
+				String resp = sync.dispatch(cmd.getLeft(), new StatusOutput<>(UTF8), cmd.getRight());
+				log.debug("tile38 answers {}", resp);
 			} catch (RedisCommandExecutionException e) {
-                log.warn("Exception {} while executing query: {}, with data: {}", e.getMessage(), cmd.toCommandString(), event.getValue());
+                log.warn("Exception {} while executing query: {}, with data: {}", e.getMessage(), cmd.getRight().toCommandString(), event.getValue());
 				throw new ConnectException(e);
 			}
     	});	

@@ -2,10 +2,10 @@ package guru.bonacci.kafka.connect.tile38;
 
 import static com.github.jcustenborder.kafka.connect.utils.SinkRecordHelper.write;
 import static io.lettuce.core.codec.StringCodec.UTF8;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.util.List;
@@ -237,13 +237,12 @@ public class Tile38SinkTaskIT {
 	private static Stream<Arguments> provideInvalidCommands() {
 	    return Stream.of(
   	      Arguments.of("bar event.one FIELD POINT event.two event.three", "123", "1.2", "2.3"),
-  	      Arguments.of("event.one event.two event.three", "no", "command", "here"),
 	      Arguments.of("bar event.one FIELD POINT event.two event.three", "null", "%%", "@@"),
 	      Arguments.of("bar event.one FIELD POINT event.two event.three", "$$", "1.2", "2.3"),
 	      Arguments.of("bar event.one FIELD event.two event.three", "100", "1.2", "2.3")
 	    );
 	}
-	
+
 	@ParameterizedTest
 	@MethodSource("provideInvalidCommands")
 	public void invalidCommandWrites(String cmdString, String one, String two, String three) {
@@ -261,7 +260,18 @@ public class Tile38SinkTaskIT {
 			this.task.put(records);
 		});
 	}
-	
+
+	@Test
+  	public void invalidCommandStartup() {
+		final String cmdString = "event.one event.two event.three";
+  	    final String topic = "foo";
+  		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
+  		config.put("tile38.topic.foo", cmdString);
+  		Assertions.assertThrows(ConfigException.class, () -> {
+  	  		this.task.start(config);
+  		});
+  	}
+
 	private Map<String, String> provideConfig(String topic) {
 		return ImmutableMap.of(SinkTask.TOPICS_CONFIG, topic, 
 				Tile38SinkConnectorConfig.TILE38_HOST, host,

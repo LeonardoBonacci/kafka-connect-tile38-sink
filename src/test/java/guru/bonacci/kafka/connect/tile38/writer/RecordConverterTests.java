@@ -8,16 +8,15 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Map;
 
+import org.apache.kafka.common.record.TimestampType;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.sink.SinkRecord;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import guru.bonacci.kafka.connect.tile38.writer.RecordConverter;
-import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
 
 
 public class RecordConverterTests {
@@ -31,7 +30,7 @@ public class RecordConverterTests {
 		SinkRecord rec = write("unused", Schema.STRING_SCHEMA, "id", schema, value);
 		final Struct recStruct = (Struct)rec.value();
 		
-		Tile38Record intRec = RecordConverter.toInternalSinkRecord(rec);
+		Tile38Record intRec = new RecordConverter().convert(rec);
 		final Map<String, Object> intRecMap = intRec.getValue();
 
 		intRecMap.keySet().forEach(key -> {
@@ -54,7 +53,7 @@ public class RecordConverterTests {
 		SinkRecord rec = write("unused", Schema.STRING_SCHEMA, "id", schema, value);
 		final Struct recStruct = (Struct)rec.value();
 		
-		Tile38Record intRec = RecordConverter.toInternalSinkRecord(rec);
+		Tile38Record intRec = new RecordConverter().convert(rec);
 		final Map<String, Object> intRecMap = intRec.getValue();
 
 		assertThat(intRecMap.get("id"), is(equalTo(recStruct.getString("id"))));
@@ -67,9 +66,32 @@ public class RecordConverterTests {
 	}
 
 	@Test
+	void convertNullKey() {
+		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA)
+				.field("foo", Schema.STRING_SCHEMA).field("bar", Schema.STRING_SCHEMA).build();
+		Struct value = new Struct(schema).put("id", "some id").put("foo", "some foo").put("bar", "some bar");
+
+		SinkRecord rec = new SinkRecord(
+	            "unused",
+	            1,
+	            Schema.STRING_SCHEMA,
+	            null,
+	            value.schema(),
+	            value,
+	            91283741L,
+	            1530286549123L,
+	            TimestampType.CREATE_TIME
+	        );
+
+
+		Tile38Record intRec = new RecordConverter().convert(rec);
+		assertThat(intRec.getKey(), is(IsNull.nullValue()));
+	}
+
+	@Test
 	void unacceptedStructString() {
 		Assertions.assertThrows(DataException.class, () -> {
-			RecordConverter.stringToMap("Struct{id=Gold,route=66,lat=12.11,lon=66.8}");
+			new RecordConverter().jsonStringToMap("Struct{id=Gold,route=66,lat=12.11,lon=66.8}");
 		});
 	}
 
@@ -83,7 +105,7 @@ public class RecordConverterTests {
 		SinkRecord rec = write("unused", Schema.STRING_SCHEMA, "foo", schema, value);
 
 		Assertions.assertThrows(DataException.class, () -> {
-			RecordConverter.toInternalSinkRecord(rec);
+			new RecordConverter().convert(rec);
 		});
 	}
 }

@@ -13,7 +13,11 @@ The following record formats are supported:
 
 ### Topics
 
-Write something about the topic-command configuration. Each configured Kafka Connect Tile38 Connector will only output data into a single database instance.
+Write something about the topic-command configuration.... Each configured Kafka Connect Tile38 Connector will only output data into a single database instance.
+
+### Tombstone messages
+
+Write something about tombstone messages....
 
 ## Configuration
 
@@ -23,8 +27,8 @@ Name |	Description	| Type	| Default |	Importance | Example
 tile38.host	| Tile38 server host. | string | localhost |	high | localhost 
 tile38.port |	Tile38 server host port number. | int | 9851 |	high | 9851
 topics | Kafka topics read by the connector | comma-separated string | | high | foo,bar
-tile38.topic.foo | Example command for foo topic | string | | low | foo event.id FIELD route event.route POINT event.lat event.lon
-tile38.topic.bar | Example command for bar topic | string | | low | anything event.the_key POINT event.latitude event.longitude
+tile38.topic.foo | Example command for 'foo' topic | string | | low | foo event.id FIELD route event.route POINT event.lat event.lon
+tile38.topic.bar | Example command for 'bar' topic | string | | low | anything event.the_key POINT event.latitude event.longitude
 
 # Build and run info
 
@@ -41,7 +45,6 @@ tile38.topic.bar | Example command for bar topic | string | | low | anything eve
 * curl -X DELETE -H "Content-type: application/json" http://localhost:8083/connectors/tile | jq
 
 # TODO
-* tombstones/deletes
 * batch insert
 * ssl
 

@@ -23,10 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class EventBuilder {
 
+	private final RecordConverter converter = new RecordConverter();
 	private Set<String> topics = newHashSet();
 	private List<SinkRecord> sinkRecords = newArrayList(); 
 
-
+	
     EventBuilder withTopics(Set<String> topics) {
         this.topics.addAll(topics);
         return this;
@@ -59,7 +60,7 @@ class EventBuilder {
         Map<String, List<Tile38Record>> interalsByTopic = 
         		transformValues(recordsByTopic, sinkRecords -> {
 	        return sinkRecords.stream()
-	                .map(RecordConverter::toInternalSinkRecord)
+	                .map(converter::convert)
 	                .collect(toList());
 	        }
         );

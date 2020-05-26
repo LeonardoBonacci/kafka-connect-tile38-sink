@@ -1,4 +1,4 @@
-package guru.bonacci.kafka.connect.tile38.writer;
+	package guru.bonacci.kafka.connect.tile38.writer;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -6,7 +6,6 @@ import static java.util.Collections.singletonMap;
 
 import java.util.Map;
 
-import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.json.JsonConverter;
 import org.apache.kafka.connect.sink.SinkRecord;
@@ -28,17 +27,35 @@ public class RecordConverter {
 	}
 
 	
-	public static Tile38Record toInternalSinkRecord(SinkRecord sinkRecord) {
-		return new Tile38Record(convertData(sinkRecord));
+	public final Tile38Record convert(SinkRecord sinkRecord) {
+		return new Tile38Record(convertKey(sinkRecord), convertValue(sinkRecord));
 	}
 
-	private static Map<String, Object> convertData(SinkRecord record) {
-		return stringToMap(getPayload(record));
+	/**
+	 * Expecting a String key
+	 */
+	private String convertKey(SinkRecord record) {
+		final Object key = record.key();
+		return key != null ? key.toString() : null; 
+	}
+
+	private Map<String, Object> convertValue(SinkRecord record) {
+		 // Tombstone records don't need to be converted
+		if (record.value() == null) {
+			return null;
+		}
+
+		return jsonStringToMap(getValue(record));
 	}
 
 	// visible for testing
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> stringToMap(String recordAsString) {
+	public Map<String, Object> jsonStringToMap(String recordAsString) {
+		 // Tombstone records don't need to be converted
+		if (recordAsString == null) {
+			return null;
+		}
+
 		try {
 			return new Gson().fromJson(recordAsString, Map.class);
 		} catch (JsonSyntaxException e) {
@@ -48,15 +65,15 @@ public class RecordConverter {
 		}
 	}
 
-	private static String getPayload(SinkRecord record) {
+	private String getValue(SinkRecord record) {
+		 // Tombstone records don't need to be converted
 		if (record.value() == null) {
 			return null;
 		}
 
-		Schema schema = record.valueSchema();
-		Object value = record.value();
-
-		byte[] rawJsonPayload = JSON_CONVERTER.fromConnectData(record.topic(), schema, value);
+		byte[] rawJsonPayload = JSON_CONVERTER.fromConnectData(record.topic(), 
+				record.valueSchema(), 
+				record.value());
 		return new String(rawJsonPayload, UTF_8);
 	}
 }

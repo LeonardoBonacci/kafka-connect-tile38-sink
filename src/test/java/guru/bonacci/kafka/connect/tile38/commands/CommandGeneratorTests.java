@@ -1,29 +1,34 @@
 package guru.bonacci.kafka.connect.tile38.commands;
 
+import static com.github.jcustenborder.kafka.connect.utils.SinkRecordHelper.write;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.common.record.TimestampType;
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.DataException;
+import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 
-import guru.bonacci.kafka.connect.tile38.commands.CommandGenerator;
 import guru.bonacci.kafka.connect.tile38.writer.RecordConverter;
+import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
+import io.lettuce.core.protocol.CommandArgs;
+import io.lettuce.core.protocol.CommandType;
 
 public class CommandGeneratorTests {
 
 	@Test
 	void preparedStatement() {
-		final String cmdString = "event.id is to be sub event.sub and event.foo event.nest.ed";
+		final String cmdString = "something event.id is to be sub event.sub and event.foo event.nest.ed";
 
 		JsonObject sinkRecord = new JsonObject();
 		sinkRecord.addProperty("id", "fooid");
@@ -34,18 +39,16 @@ public class CommandGeneratorTests {
 		nestedRecord.addProperty("ed", "fooed");
 		sinkRecord.add("nest", nestedRecord);
 
-		Pair<String, Set<String>> q = new ImmutablePair<>(
-				cmdString, 
-				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = RecordConverter.stringToMap(sinkRecord.toString());
+		CommandWrapper cmd = CommandWrapper.from(cmdString); 
+		Map<String, Object> json = new RecordConverter().jsonStringToMap(sinkRecord.toString());
 
-		String result = CommandGenerator.from(q).preparedStatement(json);
-	    assertThat(result, is(equalTo("fooid is to be sub foosub and foofoo fooed")));
+		String result = CommandGenerator.from(cmd).preparedStatement(json);
+	    assertThat(result, is(equalTo("something fooid is to be sub foosub and foofoo fooed")));
 	}
 
 	@Test
 	void prepareInvalidStatements() {
-		final String cmdString = "event.four event.one FIELD POINT event.two event.three";
+		final String cmdString = "thekey event.four event.one FIELD POINT event.two event.three";
 
 		JsonObject sinkRecord = new JsonObject();
 		sinkRecord.addProperty("one", "null");
@@ -53,51 +56,77 @@ public class CommandGeneratorTests {
 		sinkRecord.addProperty("three", "@@");
 		sinkRecord.addProperty("four", "$$");
 
-		Pair<String, Set<String>> q = new ImmutablePair<>(
-				cmdString, 
-				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = RecordConverter.stringToMap(sinkRecord.toString());
+		CommandWrapper cmd = CommandWrapper.from(cmdString); 
+		Map<String, Object> json = new RecordConverter().jsonStringToMap(sinkRecord.toString());
 
-		String result = CommandGenerator.from(q).preparedStatement(json);
-	    assertThat(result, is(equalTo("$$ null FIELD POINT %% @@")));
+		String result = CommandGenerator.from(cmd).preparedStatement(json);
+	    assertThat(result, is(equalTo("thekey $$ null FIELD POINT %% @@")));
 	}
 
 	@Test
-	void commandArgs() {
-		final String cmdString = "event.id is to be sub event.sub and event.foo event.nest.ed";
+	void compileToSET() {
+		final String cmdString = "bla event.id is to be sub nest.event.foo and nest.event.bar more";
 
-		JsonObject sinkRecord = new JsonObject();
-		sinkRecord.addProperty("id", "fooid");
-		sinkRecord.addProperty("sub", "foosub");
-		sinkRecord.addProperty("foo", "foofoo");
+		Schema nestedSchema = SchemaBuilder.struct()
+				.field("foo", Schema.STRING_SCHEMA)
+				.field("bar", Schema.STRING_SCHEMA).build();
+		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA)
+				.field("nested", nestedSchema);
 
-		JsonObject nestRecord = new JsonObject();
-		nestRecord.addProperty("ed", "fooed");
-		sinkRecord.add("nest", nestRecord);
+		Struct nestedValue = new Struct(nestedSchema).put("foo", "some foo").put("bar", "some bar");
+		Struct value = new Struct(schema).put("id", "some id").put("nested", nestedValue);
 
-		Pair<String, Set<String>> q = new ImmutablePair<>(
-				cmdString, 
-				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = RecordConverter.stringToMap(sinkRecord.toString());
+		SinkRecord rec = write("unused", Schema.STRING_SCHEMA, "id", schema, value);
 
-		String result = CommandGenerator.from(q).compile(json).toCommandString();
-	    assertThat(result, is(equalTo("fooid is to be sub foosub and foofoo fooed")));
+		Tile38Record internalRecord = new RecordConverter().convert(rec);
+
+		Pair<CommandType, CommandArgs<String, String>> result = CommandGenerator.from(
+				CommandWrapper.from(cmdString)).compile(internalRecord);
+
+	    assertThat(result.getLeft(), is(equalTo(CommandType.SET)));
+	    assertThat(result.getRight().toCommandString(), is(equalTo("bla some id is to be sub nest.event.foo and nest.event.bar more")));
 	}
-	
+
+	@Test
+	void tombstoneToDELETE() {
+		final String cmdString = "bla event.id is to be sub nest.event.foo and nest.event.bar more";
+
+		SinkRecord rec = new SinkRecord(
+	            "unused",
+	            1,
+	            Schema.STRING_SCHEMA,
+	            "thekey",
+	            null,
+	            null,
+	            91283741L,
+	            1530286549123L,
+	            TimestampType.CREATE_TIME
+	        );
+
+
+		Tile38Record internalRecord = new RecordConverter().convert(rec);
+
+		Pair<CommandType, CommandArgs<String, String>> result = CommandGenerator.from(
+				CommandWrapper.from(cmdString)).compile(internalRecord);
+
+	    assertThat(result.getLeft(), is(equalTo(CommandType.DEL)));
+	    assertThat(result.getRight().toCommandString(), is(equalTo("bla thekey")));
+	}
+
 	@Test
 	void missingField() {
-		final String cmdString = "event.id is to be event.sub";
+		final String cmdString = "qqqq event.id is to be event.sub";
 
-		JsonObject sinkRecord = new JsonObject();
-		sinkRecord.addProperty("id", "fooid");
+		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA);
+		Struct value = new Struct(schema).put("id", "some id");
 
-		Pair<String, Set<String>> q = new ImmutablePair<>(
-				cmdString, 
-				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = RecordConverter.stringToMap(sinkRecord.toString());
+		SinkRecord rec = write("unused", Schema.STRING_SCHEMA, "id", schema, value);
 
+		Tile38Record internalRecord = new RecordConverter().convert(rec);
+
+		
 		Assertions.assertThrows(DataException.class, () -> {
-			CommandGenerator.from(q).compile(json);
+			CommandGenerator.from(CommandWrapper.from(cmdString)).compile(internalRecord);
 		});
 	}
 
@@ -113,12 +142,10 @@ public class CommandGeneratorTests {
 		sinkRecord.addProperty("id", "fooid");
 		sinkRecord.add("nested", nestedRecord);
 		
-		Pair<String, Set<String>> q = new ImmutablePair<>(
-				cmdString, 
-				Sets.newHashSet(cmdString.split(" ")));
-		Map<String, Object> json = RecordConverter.stringToMap(sinkRecord.toString());
+		CommandWrapper cmd = CommandWrapper.from(cmdString); 
+		Map<String, Object> json = new RecordConverter().jsonStringToMap(sinkRecord.toString());
 
-		String result = CommandGenerator.from(q).preparedStatement(json);
+		String result = CommandGenerator.from(cmd).preparedStatement(json);
 		assertThat(result, is(equalTo("foo fooid POINT some foo some bar")));
 	}
 
