@@ -18,13 +18,13 @@ public class CommandTemplatesTests {
 
 	    assertThat(cmds.configuredTopics().count(), is(2l));
 
-	    CommandWrapper fooCmd = cmds.commandForTopic("foo");
+	    CommandWrapper fooCmd = cmds.templateForTopic("foo");
 	    assertThat(fooCmd.getCmdString(), is("foo event.query event.here"));
 	    assertThat(fooCmd.getTerms(), hasSize(2));
 	    assertThat(fooCmd.getTerms(), hasItem("event.here"));
 	    assertThat(fooCmd.getTerms(), hasItem("event.query"));
 
-	    CommandWrapper barCmd = cmds.commandForTopic("bar");
+	    CommandWrapper barCmd = cmds.templateForTopic("bar");
 	    assertThat(barCmd.getCmdString(), is("bar event.bar query here event.there"));
 	    assertThat(barCmd.getTerms(), hasSize(2));
 	    assertThat(barCmd.getTerms(), hasItem("event.bar"));

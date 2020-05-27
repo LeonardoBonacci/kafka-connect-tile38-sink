@@ -33,7 +33,7 @@ public class CommandGenerator {
 
 	
 	public Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> compile(Tile38Record record) {
-		CommandArgs<String, String> cmdArgs = new CommandArgs<>(UTF8);
+		final CommandArgs<String, String> cmdArgs = new CommandArgs<>(UTF8);
 
 		// tombstone message are deleted
 		if (record.getValue() == null) {

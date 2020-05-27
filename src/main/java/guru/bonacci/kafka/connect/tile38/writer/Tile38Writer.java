@@ -1,14 +1,13 @@
 package guru.bonacci.kafka.connect.tile38.writer;
 
 import static guru.bonacci.kafka.connect.tile38.commands.CommandGenerator.from;
+import static guru.bonacci.kafka.connect.tile38.validators.BehaviorOnErrorValues.FAIL;
 import static io.lettuce.core.LettuceFutures.awaitAll;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static guru.bonacci.kafka.connect.tile38.validators.BehaviorOnErrorValues.FAIL;
 
-import java.util.List;
-import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.errors.RetriableException;
@@ -29,14 +28,16 @@ public class Tile38Writer {
 
 	@Getter private final RedisClient client; // for testing
 	private final RedisAsyncCommands<String, String> async;
-	private final CommandTemplates cmdTemplates;
+
 	private final CommandGenerators cmds;
-    private final int flushTimeOutMs;
+
+	// Configurations
+	private final int flushTimeOutMs;
     private final BehaviorOnErrorValues behaviorOnError;
     
 	public Tile38Writer(Tile38SinkConnectorConfig config) {
-		this.cmdTemplates = config.getCmdTemplates();
-    	this.client = RedisClient.create(String.format("redis://%s:%d", config.getHost(), config.getPort()));
+		this.client = RedisClient.create(
+    			String.format("redis://%s:%d", config.getHost(), config.getPort()));
 
 		// disable auto-flushing to allow for batch inserts
 		this.async = client.connect().async();
@@ -45,27 +46,28 @@ public class Tile38Writer {
 		this.flushTimeOutMs = config.getFlushTimeOut();
 		this.behaviorOnError = config.getBehaviorOnError();
 		
+		final CommandTemplates cmdTemplates = config.getCmdTemplates();
+		// We need an available command generator for each configured topic
 		this.cmds = CommandGenerators.from(cmdTemplates.configuredTopics()
-				.collect(toMap(identity(), topic -> from(cmdTemplates.commandForTopic(topic)))));
+				.collect(toMap(identity(), topic -> from(cmdTemplates.templateForTopic(topic)))));
     }
 
 
-	public void writeData(Map<String, List<Tile38Record>> data) {
-    	data.entrySet().parallelStream().forEach(d -> writeForTopic(d.getKey(), d.getValue()));
-    }
-
-    private void writeForTopic(final String topic, List<Tile38Record> events) {
-		final RedisFuture<?>[] futures = events.stream()
-				.map(event -> cmds.by(topic).compile(event)) // create command
+	public void write(Stream<Tile38Record> records) {
+		final RedisFuture<?>[] futures = records
+				.map(event -> cmds.by(event.getTopic()).compile(event)) // create command
 				.map(cmd -> async.dispatch(cmd.getLeft(), cmd.getMiddle(), cmd.getRight())) // execute command
 				.toArray(RedisFuture[]::new); // collect futures
-	
+
+		// async batch insert
 		async.flushCommands();
+
+		//TODO Can this be called non-blocking?
 		wait(futures);
 		
-		log.debug(futures.length + " commands executed");
-   }
-    
+		log.trace(futures.length + " commands executed");
+    }
+
 	private void wait(RedisFuture<?>... futures) {
 		// Wait until all commands are executed
 		try {

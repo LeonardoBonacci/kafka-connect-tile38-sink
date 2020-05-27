@@ -1,8 +1,8 @@
 package guru.bonacci.kafka.connect.tile38;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
@@ -37,18 +37,18 @@ public class Tile38SinkTask extends SinkTask {
 
 	@Override
 	public void put(Collection<SinkRecord> records) {
-		log.debug("Putting {} records to Tile38", records.size());
+		log.trace("Putting {} records to Tile38", records.size());
 
 		if (records.isEmpty()) {
 			return;
 		}
 
-		Map<String, List<Tile38Record>> data = new EventBuilder()
+		final Stream<Tile38Record> recordStream = new RecordBuilder()
 				.withTopics(config.getTopicsConfig().configuredTopics())
 				.withSinkRecords(records)
 				.build();
 
-		writer.writeData(data);
+		writer.write(recordStream);
 	}
 
 	@Override

@@ -29,7 +29,7 @@ public class CommandTemplates {
 		return cmds.keySet().stream();
 	}
 
-	public CommandWrapper commandForTopic(String topic) {
+	public CommandWrapper templateForTopic(String topic) {
 		return cmds.get(topic);
 	}
 	
