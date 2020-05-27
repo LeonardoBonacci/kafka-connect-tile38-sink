@@ -6,6 +6,7 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.kafka.connect.sink.SinkTask.TOPICS_CONFIG;
+import static org.apache.kafka.connect.sink.SinkTask.TOPICS_REGEX_CONFIG;
 
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +53,10 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	}
 
 	private void validateConfiguredTopics(Map<String, String> props) {
+		 if (props.containsKey(TOPICS_REGEX_CONFIG)) {
+            throw new ConfigException("'topics.regex' no supported, comma separated 'topics' instead");
+		 }
+
 		 Set<String> topics = props.containsKey(TOPICS_CONFIG)
 				? stream((props.get(TOPICS_CONFIG).trim()).split(",")).map(String::trim).collect(toSet()) 
 				: emptySet();

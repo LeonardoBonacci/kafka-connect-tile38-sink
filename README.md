@@ -27,6 +27,8 @@ Name |	Description	| Type	| Default |	Importance | Example
 tile38.host	| Tile38 server host. | string | localhost |	high | localhost 
 tile38.port |	Tile38 server host port number. | int | 9851 |	high | 9851
 topics | Kafka topics read by the connector | comma-separated string | | high | foo,bar
+flush.timeout.ms | Used for periodic flushing | int | 10000 | low | 1234
+behavior.on.error | Error handling behavior | string | medium | 'LOG' or 'FAIL'.
 tile38.topic.foo | Example command for 'foo' topic | string | | low | foo event.id FIELD route event.route POINT event.lat event.lon
 tile38.topic.bar | Example command for 'bar' topic | string | | low | anything event.the_key POINT event.latitude event.longitude
 

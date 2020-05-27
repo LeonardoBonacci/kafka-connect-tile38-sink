@@ -82,10 +82,10 @@ public class Tile38SinkTaskIT {
 	@Test
 	public void emptyAssignment() {
 		final String topic = "foo";
+		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
+		config.remove("tile38.topic.foo");
 
 		Assertions.assertThrows(ConfigException.class, () -> {
-			Map<String, String> config = Maps.newHashMap(provideConfig(topic));
-			config.remove("tile38.topic.foo");
 			this.task.start(config);
 		});
 	}
@@ -100,6 +100,18 @@ public class Tile38SinkTaskIT {
 	}
 
 	@Test
+	public void topicRegex() {
+		final String topic = "foo";
+		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
+		config.remove("topics");
+		config.put(SinkTask.TOPICS_REGEX_CONFIG, topic);
+		
+		Assertions.assertThrows(ConfigException.class, () -> {
+			this.task.start(config);
+		});
+	}
+
+	@Test
 	public void unconfiguredTopic() {
 		final String topic = "foo,bar";
 
@@ -109,14 +121,33 @@ public class Tile38SinkTaskIT {
 	}
 
 	@Test
-	public void empty() {
+	public void emptyPut() {
 		final String topic = "foo";
 
 		this.task.start(provideConfig(topic));
 		this.task.put(ImmutableList.of());
 	}
 
-	private static Stream<Arguments> provideInputForValidWrite() {
+	static Stream<Arguments> provideForInvalidCommandTemplateStartup() {
+	    return Stream.of(
+	      Arguments.of("event.one event.two event.three"),
+	      Arguments.of("set first is not allowed")
+	    );
+	}
+
+	@ParameterizedTest
+	@MethodSource("provideForInvalidCommandTemplateStartup")
+  	public void invalidCommandTemplateStartup(String cmdString) {
+  	    final String topic = "foo";
+  		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
+  		config.put("tile38.topic.foo", cmdString);
+
+  		Assertions.assertThrows(ConfigException.class, () -> {
+  	  		this.task.start(config);
+  		});
+  	}
+
+	private static Stream<Arguments> provideForValidWrite() {
 	    return Stream.of(
 	      Arguments.of("12.3", "4.56", "7.89"),
 	      Arguments.of("0.3", "1111.2", "6.9"),
@@ -128,7 +159,7 @@ public class Tile38SinkTaskIT {
 	}
 	
 	@ParameterizedTest
-	@MethodSource("provideInputForValidWrite")
+	@MethodSource("provideForValidWrite")
 	public void validWrites(String route, String lat, String lon) {
 	    final String topic = "foo";
 	    this.task.start(provideConfig(topic));
@@ -177,37 +208,7 @@ public class Tile38SinkTaskIT {
 		assertThat(parser.parse(resp), is(equalTo(parser.parse(String.format(RESULT_STRING, lon, lat)))));
 	}
 
-	private static Stream<Arguments> provideInputForInvalidWrite() {
-	    return Stream.of(
-	      Arguments.of("12.3", "string", "no float"),
-	      Arguments.of("null", "0.1", "1.0"),
-	      Arguments.of("not a float", "3.1", "4.1"),
-	      Arguments.of("nothing", "0.1", "1.0"),
-	      Arguments.of("1f", "3.1", "4.1"),
-	      Arguments.of("1", "3.1f", "4.1"),
-	      Arguments.of("1F", "3.1", "4.1"),
-	      Arguments.of("1", "3.1", "4.1F"),
-	      Arguments.of("event.route", "event.lat", "event.lon")
-	    );
-	}
-
-	@ParameterizedTest
-	@MethodSource("provideInputForInvalidWrite")
-	public void invalidWrites(String route, String lat, String lon) {
-	    final String topic = "foo";
-		this.task.start(provideConfig(topic));
-
-		final String id = "fooid";
-		Schema schema = getRouteSchema();
-		Struct value = new Struct(schema).put("id", id).put("route", route).put("lat", lat).put("lon", lon);
-
-		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, id, schema, value));
-		Assertions.assertThrows(ConnectException.class, () -> {
-			this.task.put(records);
-		});
-	}
-
-	private static Stream<Arguments> provideInputForIgnoredFieldWrite() {
+	private static Stream<Arguments> provideForIgnoredFieldWrite() {
 	    return Stream.of(
 	      Arguments.of("0", "0.1", "1.0"),
 	      Arguments.of("0.0", "0.1", "1.0")
@@ -215,8 +216,8 @@ public class Tile38SinkTaskIT {
 	}
 
 	@ParameterizedTest
-	@MethodSource("provideInputForIgnoredFieldWrite")
-	public void invalidFieldWrites(String route, String lat, String lon) {
+	@MethodSource("provideForIgnoredFieldWrite")
+	public void IgnoredFieldWrite(String route, String lat, String lon) {
 	    final String topic = "foo";
 		this.task.start(provideConfig(topic));
 
@@ -234,26 +235,40 @@ public class Tile38SinkTaskIT {
 		assertThat(resp, is(not(equalTo(route))));
 	}
 
-	private static Stream<Arguments> provideInvalidCommands() {
+	private static Stream<Arguments> provideForInvalidWriteCommands() {
 	    return Stream.of(
-  	      Arguments.of("bar event.one FIELD POINT event.two event.three", "123", "1.2", "2.3"),
-	      Arguments.of("bar event.one FIELD POINT event.two event.three", "null", "%%", "@@"),
-	      Arguments.of("bar event.one FIELD POINT event.two event.three", "$$", "1.2", "2.3"),
-	      Arguments.of("bar event.one FIELD event.two event.three", "100", "1.2", "2.3")
+	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "12.3", "string", "no float"),
+	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "null", "0.1", "1.0"),
+	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "not a float", "3.1", "4.1"),
+	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "nothing", "0.1", "1.0"),
+	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1f", "3.1", "4.1"),
+	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1", "3.1f", "4.1"),
+	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1F", "3.1", "4.1"),
+	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1", "3.1", "4.1F"),
+	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "event.route", "event.lat", "event.lon"),
+  	      Arguments.of("bar event.one FIELD POINT event.two event.three", "123", "1.2", "2.3", null),
+	      Arguments.of("bar event.one FIELD POINT event.two event.three", "null", "%%", "@@", null),
+	      Arguments.of("bar event.one FIELD POINT event.two event.three", "$$", "1.2", "2.3", null),
+	      Arguments.of("bar event.one FIELD event.two event.three", "100", "1.2", "2.3", null)
 	    );
 	}
-
+	
 	@ParameterizedTest
-	@MethodSource("provideInvalidCommands")
-	public void invalidCommandWrites(String cmdString, String one, String two, String three) {
+	@MethodSource("provideForInvalidWriteCommands")
+	public void invalidWriteCommands(String cmdString, String one, String two, String three, String four) {
 	    final String topic = "foo";
 		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
 		config.put("tile38.topic.foo", cmdString);
 		this.task.start(config);
 
-		Schema schema = SchemaBuilder.struct().field("one", Schema.STRING_SCHEMA).field("two", Schema.STRING_SCHEMA)
-				.field("three", Schema.STRING_SCHEMA).build();
-		Struct value = new Struct(schema).put("one", one).put("two", two).put("three", three);
+		SchemaBuilder schemaBuilder = SchemaBuilder.struct().field("one", Schema.STRING_SCHEMA).field("two", Schema.STRING_SCHEMA)
+				.field("three", Schema.STRING_SCHEMA);
+		if (four != null)
+			schemaBuilder.field("four", Schema.STRING_SCHEMA);
+		Schema schema = schemaBuilder.build();
+
+		Struct valueBuilder = new Struct(schema).put("one", one).put("two", two).put("three", three);
+		Struct value = four != null ? valueBuilder.put("four", four) : valueBuilder;
 
 		final List<SinkRecord> records = ImmutableList.of(write(topic, Schema.STRING_SCHEMA, one, schema, value));
 		Assertions.assertThrows(ConnectException.class, () -> {
@@ -261,17 +276,7 @@ public class Tile38SinkTaskIT {
 		});
 	}
 
-	@Test
-  	public void invalidCommandStartup() {
-		final String cmdString = "event.one event.two event.three";
-  	    final String topic = "foo";
-  		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
-  		config.put("tile38.topic.foo", cmdString);
-  		Assertions.assertThrows(ConfigException.class, () -> {
-  	  		this.task.start(config);
-  		});
-  	}
-
+	// below some helper methods
 	private Map<String, String> provideConfig(String topic) {
 		return ImmutableMap.of(SinkTask.TOPICS_CONFIG, topic, 
 				Tile38SinkConnectorConfig.TILE38_HOST, host,
