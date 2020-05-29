@@ -1,19 +1,21 @@
 {
-  "name": "tile",
+  "name": "tile38-sink",
   "config": {
+    "tasks.max": "1",
     "connector.class": "guru.bonacci.kafka.connect.tile38.Tile38SinkConnector",
-    "topics": "foo,bar",
+    "topics": "stations,trains",
 
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "false",
 
-    "tile38.topic.foo": "foo event.id FIELD route event.route POINT event.lat event.lon",
-    "tile38.topic.bar": "bar event.id FIELD route event.route POINT event.lat event.lon",
+    "tile38.topic.stations": "station event.id POINT event.latitude event.longitude",
+    "tile38.topic.trains": "train event.id FIELD route event.route POINT event.lat event.lon",
 
     "tile38.host": "tile38",
     "tile38.port": 9851,
 
-    "tasks.max": "1"
+    "behavior.on.error": "log",
+    "flush.timeout.ms": "1000"
   }
 }

@@ -1,10 +1,10 @@
 {
-  "name": "bar",
+  "name": "trains-source",
   "config": {
     "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
-    "kafka.topic": "bar",
+    "kafka.topic": "trains",
 
-    "schema.filename": "/tmp/foobar.avro",
+    "schema.filename": "/tmp/train.avro",
     "schema.keyfield": "id",
 
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",

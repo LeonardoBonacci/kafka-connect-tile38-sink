@@ -1,6 +1,6 @@
 {
   "namespace": "demo",
-  "name": "fleet",
+  "name": "train",
   "type": "record",
   "fields": [
     {
@@ -8,11 +8,7 @@
       "type": {
         "type": "string",
         "arg.properties": {
-          "options": [
-            "Gold",
-            "Silver",
-            "Platinum"
-          ]
+          "regex": "Train_[1-9]"
         }
       }
     },
@@ -23,8 +19,7 @@
         "arg.properties": {
           "options": [
             40,
-            66,
-            12
+            66
           ]
         }
       }
@@ -34,11 +29,10 @@
       "type": {
         "type": "double",
         "arg.properties": {
-          "options": [
-            12.34,
-            66.8,
-            12.11
-          ]
+          "range": {
+            "min": 12.34,
+            "max": 56.78
+          }
         }
       }
     },
@@ -47,11 +41,10 @@
       "type": {
         "type": "double",
         "arg.properties": {
-          "options": [
-            12.34,
-            66.8,
-            12.11
-          ]
+          "range": {
+            "min": -98.76,
+            "max": -54.32
+          }
         }
       }
     }

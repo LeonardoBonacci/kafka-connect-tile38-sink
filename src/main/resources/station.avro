@@ -1,0 +1,56 @@
+{
+  "namespace": "demo",
+  "name": "station",
+  "type": "record",
+  "fields": [
+    {
+      "name": "id",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "options": [
+            "Wellington",
+            "CroftonDowns",
+            "Ngaio",
+            "AwaruaStreet",
+            "SimlaCrescent",
+            "BoxHill",
+            "Khandallah",
+            "Raroa",
+            "Johnsonville"
+          ]
+        }
+      }
+    },
+    {
+      "name": "latitude",
+      "type": {
+        "type": "double",
+        "arg.properties": {
+          "options": [
+            12.34,
+            23.45,
+            34.56,
+            45.67,
+            56.78
+          ]
+        }
+      }
+    },
+    {
+      "name": "longitude",
+      "type": {
+        "type": "double",
+        "arg.properties": {
+          "options": [
+            -98.76,
+            -87.65,
+            -76.54,
+            -65.43,
+            -54.32
+          ]
+        }
+      }
+    }
+  ]
+}

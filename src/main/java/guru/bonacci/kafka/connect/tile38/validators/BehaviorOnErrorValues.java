@@ -6,7 +6,7 @@ import org.apache.kafka.common.config.ConfigDef;
 
 public enum BehaviorOnErrorValues {
 
-	IGNORE, FAIL;
+	LOG, FAIL;
 
 	public static final BehaviorOnErrorValues DEFAULT = FAIL;
 
