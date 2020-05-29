@@ -85,7 +85,7 @@ public class RecordConverterTests {
 
 
 		Tile38Record intRec = new RecordConverter().convert(rec);
-		assertThat(intRec.getKey(), is(IsNull.nullValue()));
+		assertThat(intRec.getId(), is(IsNull.nullValue()));
 	}
 
 	@Test

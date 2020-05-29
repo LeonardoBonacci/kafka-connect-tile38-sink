@@ -6,6 +6,7 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.kafka.connect.sink.SinkTask.TOPICS_CONFIG;
+import static org.apache.kafka.connect.sink.SinkTask.TOPICS_REGEX_CONFIG;
 
 import java.util.Map;
 import java.util.Set;
@@ -14,11 +15,10 @@ import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
-
-import guru.bonacci.kafka.connect.tile38.commands.CommandTemplates;
-
 import org.apache.kafka.common.config.ConfigException;
 
+import guru.bonacci.kafka.connect.tile38.commands.CommandTemplates;
+import guru.bonacci.kafka.connect.tile38.validators.BehaviorOnErrorValues;
 import lombok.Getter;
 
 
@@ -29,6 +29,12 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	public static final String TILE38_PORT = "tile38.port";
 	private static final String TILE38_PORT_DOC = "Tile38 server host port number.";
 
+	public static final String FLUSH_TIMEOUT = "flush.timeout.ms";
+	private static final String FLUSH_TIMEOUT_DOC = "The timeout in milliseconds to use for periodic flushing.";
+
+	public static final String BEHAVIOR_ON_ERROR = "behavior.on.error";
+	private static final String BEHAVIOR_ON_ERROR_DOC = "Error handling behavior setting. Valid options are 'LOG' and 'FAIL'.";
+	
 	@Getter	TopicsConfig topicsConfig;
 	@Getter	CommandTemplates cmdTemplates;
 
@@ -47,6 +53,10 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	}
 
 	private void validateConfiguredTopics(Map<String, String> props) {
+		 if (props.containsKey(TOPICS_REGEX_CONFIG)) {
+            throw new ConfigException("'topics.regex' no supported, comma separated 'topics' instead");
+		 }
+
 		 Set<String> topics = props.containsKey(TOPICS_CONFIG)
 				? stream((props.get(TOPICS_CONFIG).trim()).split(",")).map(String::trim).collect(toSet()) 
 				: emptySet();
@@ -62,14 +72,24 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	public static ConfigDef conf() {
 		return new ConfigDef()
 				.define(TILE38_HOST, Type.STRING, "localhost", Importance.HIGH, TILE38_HOST_DOC)
-				.define(TILE38_PORT, Type.INT, 9851, Importance.HIGH, TILE38_PORT_DOC);
+				.define(TILE38_PORT, Type.INT, 9851, Importance.HIGH, TILE38_PORT_DOC)
+				.define(BEHAVIOR_ON_ERROR, Type.STRING, BehaviorOnErrorValues.DEFAULT.toString(), BehaviorOnErrorValues.VALIDATOR, Importance.MEDIUM, BEHAVIOR_ON_ERROR_DOC)
+				.define(FLUSH_TIMEOUT, Type.INT, 10000, Importance.LOW, FLUSH_TIMEOUT_DOC);
 	}
 
-	public String getTile38Url() {
+	public String getHost() {
 		return this.getString(TILE38_HOST);
 	}
 
-	public Integer getTile38Port() {
+	public Integer getPort() {
 		return this.getInt(TILE38_PORT);
+	}
+	
+	public Integer getFlushTimeOut() {
+		return this.getInt(FLUSH_TIMEOUT);
+	}
+	
+	public BehaviorOnErrorValues getBehaviorOnError() {
+		return BehaviorOnErrorValues.forValue(this.getString(BEHAVIOR_ON_ERROR));
 	}
 }

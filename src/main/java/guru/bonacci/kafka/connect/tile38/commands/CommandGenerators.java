@@ -8,13 +8,16 @@ import com.google.common.collect.ImmutableMap;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Wrapper class to access CommandGenerators by topic
+ */
 @RequiredArgsConstructor(access = PRIVATE)
 public class CommandGenerators {
 
 	private final Map<String, CommandGenerator> cmds;
 	
 
-	public CommandGenerator by(String topic) {
+	public CommandGenerator generatorForTopic(String topic) {
 		return cmds.get(topic);
 	}
 	

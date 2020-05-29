@@ -28,7 +28,10 @@ public class RecordConverter {
 
 	
 	public final Tile38Record convert(SinkRecord sinkRecord) {
-		return new Tile38Record(convertKey(sinkRecord), convertValue(sinkRecord));
+		return new Tile38Record(
+					sinkRecord.topic(), 
+					convertKey(sinkRecord), 
+					convertValue(sinkRecord));
 	}
 
 	/**

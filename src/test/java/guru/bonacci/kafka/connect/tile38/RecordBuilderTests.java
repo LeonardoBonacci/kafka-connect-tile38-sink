@@ -2,13 +2,13 @@ package guru.bonacci.kafka.connect.tile38;
 
 import static com.github.jcustenborder.kafka.connect.utils.SinkRecordHelper.write;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.aMapWithSize;
-import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
@@ -22,37 +22,39 @@ import com.google.common.collect.ImmutableSet;
 import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
 
 
-public class EventBuilderTests {
+public class RecordBuilderTests {
 
 	@Test
 	void buildNothing() {
-		Map<String, List<Tile38Record>> result = 
-				new EventBuilder().build();
+		Stream<Tile38Record> result = 
+				new RecordBuilder().build();
 		
-		assertThat(result, is(anEmptyMap()));
+		assertThat(result.findAny().isPresent(), is(false));
 	}
 
 	@Test
 	void buildWithoutTopic() {
-		Map<String, List<Tile38Record>> result = 
-				new EventBuilder()
+		Stream<Tile38Record> result = 
+				new RecordBuilder()
 						.withSinkRecords(recordsProvider())
 						.build();
 		
-		assertThat(result, is(anEmptyMap()));
+		assertThat(result.findAny().isPresent(), is(false));
 	}
 
 	@Test
 	void build() {
-		Map<String, List<Tile38Record>> result = 
-				new EventBuilder()
+		Stream<Tile38Record> result = 
+				new RecordBuilder()
 						.withTopics(ImmutableSet.of("t1","t2"))
 						.withSinkRecords(recordsProvider())
 						.build();
 
-		assertThat(result, is(aMapWithSize(2)));
-		assertThat(result.get("t1"), hasSize(2));
-		assertThat(result.get("t2"), hasSize(1));
+		Map<String, List<Tile38Record>> byTopic = result
+        		.collect(Collectors.groupingBy(Tile38Record::getTopic));
+
+		assertThat(byTopic.get("t1"), hasSize(2));
+		assertThat(byTopic.get("t2"), hasSize(1));
 	}
 
 	private List<SinkRecord> recordsProvider() {

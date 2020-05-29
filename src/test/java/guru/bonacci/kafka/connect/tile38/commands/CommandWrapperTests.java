@@ -17,7 +17,7 @@ public class CommandWrapperTests {
 		final String cmdString = "event.id is to be sub event.sub and event.foo event.nest.ed";
 
 		Assertions.assertThrows(ConfigException.class, () -> {
-			CommandWrapper.from(cmdString);
+			CommandTemplate.from(cmdString);
 		});
 	}
 
@@ -26,7 +26,7 @@ public class CommandWrapperTests {
 		final String cmdString = "  event.id is to be sub event.sub and event.foo event.nest.ed";
 
 		Assertions.assertThrows(ConfigException.class, () -> {
-			CommandWrapper.from(cmdString);
+			CommandTemplate.from(cmdString);
 		});
 	}
 
@@ -35,7 +35,7 @@ public class CommandWrapperTests {
 		final String cmdString = null;
 
 		Assertions.assertThrows(ConfigException.class, () -> {
-			CommandWrapper.from(cmdString);
+			CommandTemplate.from(cmdString);
 		});
 	}
 	
@@ -44,8 +44,8 @@ public class CommandWrapperTests {
 		final String spacedCmdString = "  foo is to be sub event.sub and event.foo event.nest.ed  ";
 		final String cmdString = "foo is to be sub event.sub and event.foo event.nest.ed";
 
-		CommandWrapper spacedCmd = CommandWrapper.from(spacedCmdString);
-		CommandWrapper cmd = CommandWrapper.from(cmdString);
+		CommandTemplate spacedCmd = CommandTemplate.from(spacedCmdString);
+		CommandTemplate cmd = CommandTemplate.from(cmdString);
 
 		assertThat(spacedCmd, is(equalTo(cmd)));
 	}
@@ -54,7 +54,7 @@ public class CommandWrapperTests {
 	void normal() {
 		final String cmdString = "foo event.id to be sub event.sub and event.foo event.nest.ed";
 
-		CommandWrapper cmd = CommandWrapper.from(cmdString); 
+		CommandTemplate cmd = CommandTemplate.from(cmdString); 
 
 	    assertThat(cmd.getCmdString(), is(equalTo(cmdString)));
 	    assertThat(cmd.getKey(), is(equalTo("foo")));

@@ -11,6 +11,7 @@ import lombok.ToString;
 @RequiredArgsConstructor
 public class Tile38Record {
 
-	private final String key;
+	private final String topic;
+	private final String id;
 	private final Map<String, Object> value;
 }
