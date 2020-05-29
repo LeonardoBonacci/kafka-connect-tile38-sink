@@ -12,6 +12,6 @@ import lombok.ToString;
 public class Tile38Record {
 
 	private final String topic;
-	private final String key;
+	private final String id;
 	private final Map<String, Object> value;
 }

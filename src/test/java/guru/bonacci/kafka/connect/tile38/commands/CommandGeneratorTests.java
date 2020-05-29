@@ -40,7 +40,7 @@ public class CommandGeneratorTests {
 		nestedRecord.addProperty("ed", "fooed");
 		sinkRecord.add("nest", nestedRecord);
 
-		CommandWrapper cmd = CommandWrapper.from(cmdString); 
+		CommandTemplate cmd = CommandTemplate.from(cmdString); 
 		Map<String, Object> json = new RecordConverter().jsonStringToMap(sinkRecord.toString());
 
 		String result = CommandGenerator.from(cmd).preparedStatement(json);
@@ -57,7 +57,7 @@ public class CommandGeneratorTests {
 		sinkRecord.addProperty("three", "@@");
 		sinkRecord.addProperty("four", "$$");
 
-		CommandWrapper cmd = CommandWrapper.from(cmdString); 
+		CommandTemplate cmd = CommandTemplate.from(cmdString); 
 		Map<String, Object> json = new RecordConverter().jsonStringToMap(sinkRecord.toString());
 
 		String result = CommandGenerator.from(cmd).preparedStatement(json);
@@ -82,7 +82,7 @@ public class CommandGeneratorTests {
 		Tile38Record internalRecord = new RecordConverter().convert(rec);
 
 		Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> result = CommandGenerator.from(
-				CommandWrapper.from(cmdString)).compile(internalRecord);
+				CommandTemplate.from(cmdString)).compile(internalRecord);
 
 	    assertThat(result.getLeft(), is(equalTo(CommandType.SET)));
 	    assertThat(result.getRight().toCommandString(), is(equalTo("bla some id is to be sub nest.event.foo and nest.event.bar more")));
@@ -108,7 +108,7 @@ public class CommandGeneratorTests {
 		Tile38Record internalRecord = new RecordConverter().convert(rec);
 
 		Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> result = CommandGenerator.from(
-				CommandWrapper.from(cmdString)).compile(internalRecord);
+				CommandTemplate.from(cmdString)).compile(internalRecord);
 
 	    assertThat(result.getLeft(), is(equalTo(CommandType.DEL)));
 	    assertThat(result.getRight().toCommandString(), is(equalTo("bla thekey")));
@@ -127,7 +127,7 @@ public class CommandGeneratorTests {
 
 		
 		Assertions.assertThrows(DataException.class, () -> {
-			CommandGenerator.from(CommandWrapper.from(cmdString)).compile(internalRecord);
+			CommandGenerator.from(CommandTemplate.from(cmdString)).compile(internalRecord);
 		});
 	}
 
@@ -143,7 +143,7 @@ public class CommandGeneratorTests {
 		sinkRecord.addProperty("id", "fooid");
 		sinkRecord.add("nested", nestedRecord);
 		
-		CommandWrapper cmd = CommandWrapper.from(cmdString); 
+		CommandTemplate cmd = CommandTemplate.from(cmdString); 
 		Map<String, Object> json = new RecordConverter().jsonStringToMap(sinkRecord.toString());
 
 		String result = CommandGenerator.from(cmd).preparedStatement(json);

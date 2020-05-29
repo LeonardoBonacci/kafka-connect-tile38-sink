@@ -7,10 +7,10 @@ import static java.util.function.Function.identity;
 import static java.util.regex.Matcher.quoteReplacement;
 import static java.util.stream.Collectors.toMap;
 import static lombok.AccessLevel.PRIVATE;
+import static org.apache.commons.lang3.tuple.Triple.of;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -25,57 +25,84 @@ import io.lettuce.core.protocol.CommandType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Class that facilitates Redis command generation based on sinking records
+ */
 @Slf4j
 @RequiredArgsConstructor(access = PRIVATE)
 public class CommandGenerator {
 
-	private final CommandWrapper cmd;
+	private final CommandTemplate cmd;
 
-	
-	public Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> compile(Tile38Record record) {
+	/**
+	 * Generates a Redis command based on a record's key and/or value.
+	 * Sending a command with Lettuce requires three arguments:
+	 * 1. CommandType: SET or DEL
+	 * 2. CommandOutput: Lettuce forces one to anticipate on the result data type
+	 * 3. CommandArgs: The actual command terms
+	 */
+	public Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> compile(final Tile38Record record) {
+		final Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> generatedCmd;
 		final CommandArgs<String, String> cmdArgs = new CommandArgs<>(UTF8);
 
-		// tombstone message are deleted
-		if (record.getValue() == null) {
-			cmdArgs.add(cmd.getKey());
-			cmdArgs.add(record.getKey());
+		if (record.getValue() != null) {
+			// convert the command string into a CommandArgs object.
+			asList(preparedStatement(record.getValue()).split(" ")).forEach(cmdArgs::add);
+		    generatedCmd = of(CommandType.SET, new StatusOutput<>(UTF8), cmdArgs);
+		    
+		} else { 		
+			// Tombstone messages are deleted
+			// Command format: DEL key id
+			cmdArgs.add(cmd.getKey()); //key
+			cmdArgs.add(record.getId()); //id
 
-			log.info("Compiled to: {} {}", CommandType.DEL.toString(), cmdArgs.toCommandString());
-			return Triple.of(CommandType.DEL, new IntegerOutput<>(UTF8), cmdArgs);
-		} 
+			generatedCmd = of(CommandType.DEL, new IntegerOutput<>(UTF8), cmdArgs);
+		}
 			
-		asList(preparedStatement(record.getValue()).split(" ")).forEach(cmdArgs::add);
-		
-		log.info("Compiled to: {} {}", CommandType.SET, cmdArgs.toCommandString());
-	    return Triple.of(CommandType.SET, new StatusOutput<>(UTF8), cmdArgs);
+		log.trace("Compiled to: {} {}", generatedCmd.getLeft(), cmdArgs.toCommandString());
+	    return generatedCmd;
 	}
 
+	/**
+	 * A command statement is created by 
+	 * substituting the command terms with the records actual values.
+	 * 'event.XYZ' corresponds here to a records field name XYZ.
+	 * Nesting is supported with dots, as in 'outermost.outer.inner.innermost'
+	 */
 	// visible for testing
-	String preparedStatement(Map<String, Object> json) {
-		Stream<String> events = cmd.getTerms().stream();
-		Map<String, String> parsed = events.collect(toMap(identity(), ev -> {
+	String preparedStatement(final Map<String, Object> record) {
+		// determine for each command term its corresponding record value
+		final Map<String, String> parsed = cmd.getTerms().stream()
+			.collect(toMap(identity(), term -> {
 			try {
-				String prop = ev.replace(TOKERATOR, "");
-				Object val = PropertyUtils.getProperty(json, prop);
+				// field name is query term without 'event.'
+				String prop = term.replace(TOKERATOR, "");
+				
+				// given the field name, retrieve the field value from the record
+				Object val = PropertyUtils.getProperty(record, prop);
 
-				if (val == null)
+				if (val == null) {
+					// record does not contain required field 
 					throw new IllegalAccessException();
+				}
 				return String.valueOf(val);
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-				log.warn("Field mismatch command {}, and sink record {}", ev, json);
+				log.warn("Field mismatch command {}, and sink record {}", term, record);
 				throw new DataException("Field mismatch between command and sink record", e);
 			}
 		}));
 
-		String result = cmd.getCmdString();
+		// build the command string by replacing the command terms with record values.
+		String generatedCmdString = cmd.getCmdString();
 		for (Map.Entry<String, String> entry : parsed.entrySet()) {
-			result = result.replaceAll(entry.getKey(), quoteReplacement(entry.getValue()));
+			// thereby escaping characters
+			generatedCmdString = generatedCmdString.replaceAll(entry.getKey(), quoteReplacement(entry.getValue()));
 		}
 
-		return result;
+		return generatedCmdString;
 	}
 	
-	public static CommandGenerator from(CommandWrapper cmd) {
+	public static CommandGenerator from(CommandTemplate cmd) {
 		return new CommandGenerator(cmd);
 	}
 }
