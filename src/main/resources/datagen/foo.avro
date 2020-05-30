@@ -1,0 +1,50 @@
+{
+  "namespace": "demo",
+  "name": "foo",
+  "type": "record",
+  "fields": [
+    {
+      "name": "bar",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "options": [
+            "one",
+            "two",
+            "three"
+          ]
+        }
+      }
+    },
+    {
+      "name": "bar1",
+      "type": {
+        "type": "double",
+        "arg.properties": {
+          "options": [
+            12.34,
+            23.45,
+            34.56,
+            45.67,
+            56.78
+          ]
+        }
+      }
+    },
+    {
+      "name": "bar2",
+      "type": {
+        "type": "double",
+        "arg.properties": {
+          "options": [
+            -98.76,
+            -87.65,
+            -76.54,
+            -65.43,
+            -54.32
+          ]
+        }
+      }
+    }
+  ]
+}

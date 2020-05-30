@@ -88,8 +88,7 @@ services:
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
     volumes:
       - ./target/kafka-connect-tile38-sink-1.0-SNAPSHOT-package/share/java/kafka-connect-tile38-sink:/usr/share/confluent-hub-components/kafka-connect-tile38-sink
-      - ./src/main/resources/station.avro:/tmp/station.avro
-      - ./src/main/resources/train.avro:/tmp/train.avro
+      - ./src/main/resources/datagen:/tmp
 
     links:
       - tile38

@@ -1,18 +1,17 @@
 {
-  "name": "datagen-test",
+  "name": "foo-avro-source",
   "config": {
     "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
-    "kafka.topic": "test",
+    "kafka.topic": "foo",
 
-    "schema.filename": "/tmp/foobar.avro",
-    "schema.keyfield": "id",
+    "schema.filename": "/tmp/foo.avro",
 
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "io.confluent.connect.avro.AvroConverter",
     "value.converter.schema.registry.url": "http://schema-registry:8081",
 
     "max.interval": 500,
-    "iterations": 1000000,
+    "iterations": 1000,
 
     "tasks.max": "1"
   }

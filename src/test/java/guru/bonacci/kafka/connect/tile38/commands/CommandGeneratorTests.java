@@ -150,4 +150,23 @@ public class CommandGeneratorTests {
 		assertThat(result, is(equalTo("foo fooid POINT some foo some bar")));
 	}
 
+	@Test
+	void compileWithRepeatingTermNames() {
+		final String cmdString = "foo event.bar POINT event.bar1 event.bar2";
+
+		Schema schema = SchemaBuilder.struct().field("bar", Schema.STRING_SCHEMA).field("bar1", Schema.FLOAT32_SCHEMA).field("bar2", Schema.FLOAT32_SCHEMA);
+
+		Struct value = new Struct(schema).put("bar", "one").put("bar1", 12.34f).put("bar2", 56.78f);
+
+		SinkRecord rec = write("unused", Schema.STRING_SCHEMA, "foo", schema, value);
+
+		Tile38Record internalRecord = new RecordConverter().convert(rec);
+
+		Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> result = CommandGenerator.from(
+				CommandTemplate.from(cmdString)).compile(internalRecord);
+
+	    assertThat(result.getLeft(), is(equalTo(CommandType.SET)));
+	    assertThat(result.getRight().toCommandString(), is(equalTo("foo one POINT 12.34 56.78")));
+	}
+
 }

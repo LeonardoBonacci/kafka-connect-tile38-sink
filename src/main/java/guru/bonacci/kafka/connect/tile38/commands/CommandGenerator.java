@@ -1,5 +1,6 @@
 package guru.bonacci.kafka.connect.tile38.commands;
 
+import static org.apache.commons.lang3.StringUtils.strip;
 import static guru.bonacci.kafka.connect.tile38.Constants.TOKERATOR;
 import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.Arrays.asList;
@@ -72,12 +73,15 @@ public class CommandGenerator {
 	// visible for testing
 	String preparedStatement(final Map<String, Object> record) {
 		// determine for each command term its corresponding record value
+		log.trace("record {}", record);
+
 		final Map<String, String> parsed = cmd.getTerms().stream()
 			.collect(toMap(identity(), term -> {
 			try {
+				log.debug("term {}", term);
 				// field name is query term without 'event.'
 				String prop = term.replace(TOKERATOR, "");
-				
+				log.debug("prop {}", prop);
 				// given the field name, retrieve the field value from the record
 				Object val = PropertyUtils.getProperty(record, prop);
 
@@ -85,6 +89,7 @@ public class CommandGenerator {
 					// record does not contain required field 
 					throw new IllegalAccessException();
 				}
+				log.debug("val {}", val);
 				return String.valueOf(val);
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 				log.warn("Field mismatch command {}, and sink record {}", term, record);
@@ -93,13 +98,17 @@ public class CommandGenerator {
 		}));
 
 		// build the command string by replacing the command terms with record values.
-		String generatedCmdString = cmd.getCmdString();
+		// substitute 'event.x + space' to avoid eager substitution of similar term names, 
+		// as in 'foo event.bar POINT event.bar1 event.bar2'
+		
+		// add a temporary space to command string to substitute last term 
+		String generatedCmdString = cmd.getCmdString() + " ";
 		for (Map.Entry<String, String> entry : parsed.entrySet()) {
 			// thereby escaping characters
-			generatedCmdString = generatedCmdString.replaceAll(entry.getKey(), quoteReplacement(entry.getValue()));
+			generatedCmdString = generatedCmdString.replaceAll(entry.getKey() + " ", quoteReplacement(entry.getValue() + " "));
 		}
 
-		return generatedCmdString;
+		return strip(generatedCmdString);
 	}
 	
 	public static CommandGenerator from(CommandTemplate cmd) {
