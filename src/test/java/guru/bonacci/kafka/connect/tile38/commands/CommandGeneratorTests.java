@@ -169,4 +169,10 @@ public class CommandGeneratorTests {
 	    assertThat(result.getRight().toCommandString(), is(equalTo("foo one POINT 12.34 56.78")));
 	}
 
+	@Test
+	void unacceptedStructString() {
+		Assertions.assertThrows(DataException.class, () -> {
+			new RecordConverter().jsonStringToMap("Struct{id=Gold,route=66,lat=12.11,lon=66.8}");
+		});
+	}
 }

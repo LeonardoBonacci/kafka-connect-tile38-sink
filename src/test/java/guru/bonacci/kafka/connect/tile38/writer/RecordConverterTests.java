@@ -88,14 +88,6 @@ public class RecordConverterTests {
 		assertThat(intRec.getId(), is(IsNull.nullValue()));
 	}
 
-	@Test
-	void unacceptedStructString() {
-		Assertions.assertThrows(DataException.class, () -> {
-			new RecordConverter().jsonStringToMap("Struct{id=Gold,route=66,lat=12.11,lon=66.8}");
-		});
-	}
-
-	
 	@Test // Will this ever happen?
 	void invalidSinkRecord() {
 		Schema schema = SchemaBuilder.struct()

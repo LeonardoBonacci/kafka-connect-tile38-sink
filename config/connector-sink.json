@@ -16,6 +16,10 @@
     "tile38.port": 9851,
 
     "behavior.on.error": "log",
-    "flush.timeout.ms": "1000"
+    "flush.timeout.ms": "1000",
+
+    "transforms": "RemoveSpaces",
+    "transforms.RemoveSpaces.type":"guru.bonacci.kafka.connect.tile38.transforms.RemoveWhiteSpaces",
+    "transforms.RemoveSpaces.field":"id"
   }
 }

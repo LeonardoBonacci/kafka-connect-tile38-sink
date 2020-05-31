@@ -11,19 +11,19 @@ import org.apache.kafka.connect.json.JsonConverter;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.storage.Converter;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class RecordConverter {
 
 	private static final Converter JSON_CONVERTER;
-
+	private static final ObjectMapper MAPPER;
+	
 	static {
 		JSON_CONVERTER = new JsonConverter();
 		JSON_CONVERTER.configure(singletonMap("schemas.enable", "false"), false);
+		
+		MAPPER = new ObjectMapper();
 	}
 
 	
@@ -42,7 +42,7 @@ public class RecordConverter {
 		return key != null ? key.toString() : null; 
 	}
 
-	private Map<String, Object> convertValue(SinkRecord record) {
+	public Map<String, Object> convertValue(SinkRecord record) {
 		 // Tombstone records don't need to be converted
 		if (record.value() == null) {
 			return null;
@@ -53,18 +53,15 @@ public class RecordConverter {
 
 	// visible for testing
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> jsonStringToMap(String recordAsString) {
-		 // Tombstone records don't need to be converted
-		if (recordAsString == null) {
+	public Map<String, Object> jsonStringToMap(String jsonString) {
+		if (jsonString == null) {
 			return null;
 		}
 
 		try {
-			return new Gson().fromJson(recordAsString, Map.class);
-		} catch (JsonSyntaxException e) {
-			String warning = format("Problems parsing record value %s", recordAsString);
-			log.warn(warning);
-			throw new DataException(warning, e);
+			return MAPPER.readValue(jsonString, Map.class);
+		} catch (JsonProcessingException e) {
+			throw new DataException(format("Problems parsing json %s", jsonString), e);
 		}
 	}
 

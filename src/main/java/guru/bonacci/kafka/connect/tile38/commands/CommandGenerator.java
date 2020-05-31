@@ -71,9 +71,9 @@ public class CommandGenerator {
 	 * Nesting is supported with dots, as in 'outermost.outer.inner.innermost'
 	 */
 	// visible for testing
-	String preparedStatement(final Map<String, Object> record) {
+	String preparedStatement(final Map<String, Object> recordValues) {
 		// determine for each command term its corresponding record value
-		log.trace("record {}", record);
+		log.trace("record values {}", recordValues);
 
 		final Map<String, String> parsed = cmd.getTerms().stream()
 			.collect(toMap(identity(), term -> {
@@ -83,7 +83,7 @@ public class CommandGenerator {
 				String prop = term.replace(TOKERATOR, "");
 				log.debug("prop {}", prop);
 				// given the field name, retrieve the field value from the record
-				Object val = PropertyUtils.getProperty(record, prop);
+				Object val = PropertyUtils.getProperty(recordValues, prop);
 
 				if (val == null) {
 					// record does not contain required field 
@@ -92,7 +92,7 @@ public class CommandGenerator {
 				log.debug("val {}", val);
 				return String.valueOf(val);
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-				log.warn("Field mismatch command {}, and sink record {}", term, record);
+				log.warn("Field mismatch command {}, and sink record {}", term, recordValues);
 				throw new DataException("Field mismatch between command and sink record", e);
 			}
 		}));
