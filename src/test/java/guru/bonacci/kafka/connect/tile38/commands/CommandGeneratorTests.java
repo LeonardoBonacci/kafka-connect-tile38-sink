@@ -29,7 +29,7 @@ public class CommandGeneratorTests {
 
 	@Test
 	void preparedStatement() {
-		final String cmdString = "something event.id is to be sub event.sub and event.foo event.nest.ed";
+		final String cmdString = "SET something event.id is to be sub event.sub and event.foo event.nest.ed";
 
 		JsonObject sinkRecord = new JsonObject();
 		sinkRecord.addProperty("id", "fooid");
@@ -49,7 +49,7 @@ public class CommandGeneratorTests {
 
 	@Test
 	void prepareInvalidStatements() {
-		final String cmdString = "thekey event.four event.one FIELD POINT event.two event.three";
+		final String cmdString = "SET thekey event.four event.one FIELD POINT event.two event.three";
 
 		JsonObject sinkRecord = new JsonObject();
 		sinkRecord.addProperty("one", "null");
@@ -66,7 +66,7 @@ public class CommandGeneratorTests {
 
 	@Test
 	void compileToSET() {
-		final String cmdString = "bla event.id is to be sub nest.event.foo and nest.event.bar more";
+		final String cmdString = "Set bla event.id is to be sub nest.event.foo and nest.event.bar more";
 
 		Schema nestedSchema = SchemaBuilder.struct()
 				.field("foo", Schema.STRING_SCHEMA)
@@ -90,7 +90,7 @@ public class CommandGeneratorTests {
 
 	@Test
 	void tombstoneToDELETE() {
-		final String cmdString = "bla event.id is to be sub nest.event.foo and nest.event.bar more";
+		final String cmdString = "SET bla event.id is to be sub nest.event.foo and nest.event.bar more";
 
 		SinkRecord rec = new SinkRecord(
 	            "unused",
@@ -116,7 +116,7 @@ public class CommandGeneratorTests {
 
 	@Test
 	void missingField() {
-		final String cmdString = "qqqq event.id is to be event.sub";
+		final String cmdString = "set qqqq event.id is to be event.sub";
 
 		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA);
 		Struct value = new Struct(schema).put("id", "some id");
@@ -133,7 +133,7 @@ public class CommandGeneratorTests {
 
 	@Test
 	void nesting() {
-		final String cmdString = "foo event.id POINT event.nested.foo event.nested.bar";
+		final String cmdString = "seT foo event.id POINT event.nested.foo event.nested.bar";
 
 		JsonObject nestedRecord = new JsonObject();
 		nestedRecord.addProperty("foo", "some foo");
@@ -152,7 +152,7 @@ public class CommandGeneratorTests {
 
 	@Test
 	void compileWithRepeatingTermNames() {
-		final String cmdString = "foo event.bar POINT event.bar1 event.bar2";
+		final String cmdString = "set foo event.bar POINT event.bar1 event.bar2";
 
 		Schema schema = SchemaBuilder.struct().field("bar", Schema.STRING_SCHEMA).field("bar1", Schema.FLOAT32_SCHEMA).field("bar2", Schema.FLOAT32_SCHEMA);
 

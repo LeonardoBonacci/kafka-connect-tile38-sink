@@ -131,7 +131,8 @@ public class Tile38SinkTaskIT {
 	static Stream<Arguments> provideForInvalidCommandTemplateStartup() {
 	    return Stream.of(
 	      Arguments.of("event.one event.two event.three"),
-	      Arguments.of("set first is not allowed")
+	      Arguments.of(" set "),
+	      Arguments.of("set nokey")
 	    );
 	}
 
@@ -185,7 +186,7 @@ public class Tile38SinkTaskIT {
 	    final String topic = "foo";
 
 		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
-		config.put("tile38.topic.foo", "foo event.id POINT event.nested.lat event.nested.lon");
+		config.put("tile38.topic.foo", "SET foo event.id POINT event.nested.lat event.nested.lon");
 		this.task.start(config);
 
 		final String id = "fooid";
@@ -237,19 +238,19 @@ public class Tile38SinkTaskIT {
 
 	private static Stream<Arguments> provideForInvalidWriteCommands() {
 	    return Stream.of(
-	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "12.3", "string", "no float"),
-	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "null", "0.1", "1.0"),
-	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "not a float", "3.1", "4.1"),
-	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "nothing", "0.1", "1.0"),
-	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1f", "3.1", "4.1"),
-	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1", "3.1f", "4.1"),
-	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1F", "3.1", "4.1"),
-	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1", "3.1", "4.1F"),
-	      Arguments.of("foo event.one FIELD route event.two POINT event.three event.four", "fooid", "event.route", "event.lat", "event.lon"),
-  	      Arguments.of("bar event.one FIELD POINT event.two event.three", "123", "1.2", "2.3", null),
-	      Arguments.of("bar event.one FIELD POINT event.two event.three", "null", "%%", "@@", null),
-	      Arguments.of("bar event.one FIELD POINT event.two event.three", "$$", "1.2", "2.3", null),
-	      Arguments.of("bar event.one FIELD event.two event.three", "100", "1.2", "2.3", null)
+	      Arguments.of("SET foo event.one FIELD route event.two POINT event.three event.four", "fooid", "12.3", "string", "no float"),
+	      Arguments.of("SET foo  event.one FIELD route event.two POINT event.three event.four", "fooid", "null", "0.1", "1.0"),
+	      Arguments.of("SET foo event.one FIELD route event.two POINT event.three event.four", "fooid", "not a float", "3.1", "4.1"),
+	      Arguments.of("SET foo event.one FIELD route event.two POINT event.three event.four", "fooid", "nothing", "0.1", "1.0"),
+	      Arguments.of("SET foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1f", "3.1", "4.1"),
+	      Arguments.of("SET foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1", "3.1f", "4.1"),
+	      Arguments.of("SET foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1F", "3.1", "4.1"),
+	      Arguments.of("SET foo event.one FIELD route event.two POINT event.three event.four", "fooid", "1", "3.1", "4.1F"),
+	      Arguments.of("SET foo event.one FIELD route event.two POINT event.three event.four", "fooid", "event.route", "event.lat", "event.lon"),
+  	      Arguments.of("SET bar event.one FIELD POINT event.two event.three", "123", "1.2", "2.3", null),
+	      Arguments.of("SET bar event.one FIELD POINT event.two event.three", "null", "%%", "@@", null),
+	      Arguments.of("SET bar event.one FIELD POINT event.two event.three", "$$", "1.2", "2.3", null),
+	      Arguments.of("SET bar event.one FIELD event.two event.three", "100", "1.2", "2.3", null)
 	    );
 	}
 	
@@ -281,7 +282,7 @@ public class Tile38SinkTaskIT {
 		return ImmutableMap.of(SinkTask.TOPICS_CONFIG, topic, 
 				Tile38SinkConnectorConfig.TILE38_HOST, host,
 				Tile38SinkConnectorConfig.TILE38_PORT, port, 
-				"tile38.topic.foo", "foo event.id FIELD route event.route POINT event.lat event.lon");
+				"tile38.topic.foo", "SET   foo    event.id   FIELD  route   event.route   POINT   event.lat   event.lon");
 	}
 	
 	private Schema getRouteSchema() {

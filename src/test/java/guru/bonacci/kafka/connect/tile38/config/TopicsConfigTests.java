@@ -21,8 +21,8 @@ public class TopicsConfigTests {
 				"key.converter", "org.apache.kafka.connect.storage.StringConverter", 
 				"value.converter", "org.apache.kafka.connect.storage.StringConverter", 
 			    "topics", "foo,bar",
-			    "tile38.topic.foo", "foo event.query event.here",
-		    	"tile38.topic.bar", "bar event.bar query here event.there"));
+			    "tile38.topic.foo", "SET foo event.query event.here",
+		    	"tile38.topic.bar", "set bar event.bar query here event.there"));
 	}
 
 	@Test
@@ -33,7 +33,7 @@ public class TopicsConfigTests {
 
 	    Map<String, String> cmds = topics.getCmdsByTopic();
 		assertThat(cmds, is(aMapWithSize(2)));
-	    assertThat(cmds.get("foo"), is("foo event.query event.here"));
-	    assertThat(cmds.get("bar"), is("bar event.bar query here event.there"));
+	    assertThat(cmds.get("foo"), is("SET foo event.query event.here"));
+	    assertThat(cmds.get("bar"), is("set bar event.bar query here event.there"));
 	}
 }

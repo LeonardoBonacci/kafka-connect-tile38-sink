@@ -54,10 +54,7 @@ props event.identifier BOUNDS event.southwestlatitude, event.southwestlongitude,
 Specified event fields that do not match any topic value field name result in invalid commands. This will cause runtime errors. A few hints: 
 - Referring to nested fields is possible using the dot notation, as in *event.nest.my-field*
 - Only value fields are permitted. 
-- The SET word is to be ommitted in the command.
-  - *SET fleet truck1 POINT 33.5123 -112.2693* is specified as *fleet truck1 POINT 33.5123 -112.2693*
-  - *SET fleet event.id POINT event.lat event.lon* is specified as *fleet event.id POINT event.lat event.lon*
-- Use of the DEL word as the first term is not allowed, as it corresponds with the DEL command.
+- Using anything other than a SET command is not supported at this stage.
 
 
 ### Tombstone messages

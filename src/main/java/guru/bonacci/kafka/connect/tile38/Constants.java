@@ -6,8 +6,7 @@ public class Constants {
 	private static final String SEPARATOR = ".";
 	public static final String TOKERATOR = TOKEN + SEPARATOR;
 
-	public static final String SET_RESERVED = "SET";
-	public static final String DEL_RESERVED = "DEL";
+	public static final String SET_TERM = "SET";
 	
 	public static final String COMMAND_PREFIX = "tile38.topic.";
 }

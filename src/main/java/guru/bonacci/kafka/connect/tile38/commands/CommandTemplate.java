@@ -1,16 +1,12 @@
 package guru.bonacci.kafka.connect.tile38.commands;
 
-import static com.google.common.collect.ImmutableList.copyOf;
-import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Sets.newHashSet;
-import static guru.bonacci.kafka.connect.tile38.Constants.DEL_RESERVED;
-import static guru.bonacci.kafka.connect.tile38.Constants.SET_RESERVED;
+import static guru.bonacci.kafka.connect.tile38.Constants.SET_TERM;
 import static guru.bonacci.kafka.connect.tile38.Constants.TOKERATOR;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.strip;
 
-import java.util.List;
 import java.util.Set;
 
 import org.apache.kafka.common.config.ConfigException;
@@ -47,32 +43,32 @@ public class CommandTemplate {
 	 * SET key id [FIELD name value ...] [EX seconds] [NX|XX] (OBJECT
 	 * geojson)|(POINT lat lon [z])|(BOUNDS minlat minlon maxlat maxlon)|(HASH
 	 * geohash)|(STRING value)
-	 * 
-	 * 'Compile time' verification only on the first term, it being a valid key.
-	 * Otherwise invalid commands arise 'run time'.
 	 */
 	public static CommandTemplate from(String cmdString) {
 		if (isBlank(cmdString)) {
-			throw new ConfigException("Command cannot be blank");
+			throw new ConfigException("Command cannot be empty");
 		}
+
+		// remove excessive spaces and strip the SET term from the command string
+		final String[] setAndCmdString = strip(cmdString.replaceAll("[ ]+", " ")).split(" ", 2);
 		
-		String trimmedCmdString = strip(cmdString);
-		// List to keep order
-		List<String> cmdTerms = copyOf(trimmedCmdString.split(" "));
+		if (!SET_TERM.equalsIgnoreCase(setAndCmdString[0])) 
+	    	throw new ConfigException(String.format("Only SET commands are supported. Configured command '%s' starts with '%s'", cmdString, setAndCmdString[0]));
 
-		String key = cmdTerms.get(0);
-	    if (key.startsWith(TOKERATOR))
-	    	throw new ConfigException("Command {} cannot start with 'event.'. The first command word is the key. Check the docs: {}", 
-	    			cmdString, "https://tile38.com/commands/set/");
+		if (setAndCmdString.length < 2) 
+	    	throw new ConfigException(String.format("No key defined in command '%s'", cmdString));
 
-	    if (of(SET_RESERVED, DEL_RESERVED).contains(key.toUpperCase()))
-	    	throw new ConfigException("SET and DEL are reserved words and can be ommitted. Command {} cannot start with either one.", cmdString);
-	    	
-	    // no more need for order
-	    Set<String> terms = newHashSet(cmdTerms);
+		final String cmdStringWithoutSet = setAndCmdString[1];
+
+		// strip the key from the command string
+		final String[] keyAndCmdString = cmdStringWithoutSet.split(" ", 2);
+		if (keyAndCmdString.length < 2) 
+	    	throw new ConfigException(String.format("No id defined in command '%s'", cmdString));
+		
+		final Set<String> terms = newHashSet(cmdStringWithoutSet.split(" "));
 		// remove all command terms that do not start with 'event.'
 		terms.removeIf(s -> !s.startsWith(TOKERATOR));
 
-	    return new CommandTemplate(trimmedCmdString, key, terms);
+	    return new CommandTemplate(cmdStringWithoutSet, keyAndCmdString[0], terms);
 	}
 }
