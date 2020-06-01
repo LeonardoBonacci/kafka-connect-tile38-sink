@@ -2,7 +2,7 @@
 
 ## Usage
 
-Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into Redis SET and DEL commands that are executed against Tile38. Only sinking data is supported. [Check out Tile38](https://tile38.com/)! For streaming (back) into Kafka a [webhook](https://tile38.com/commands/sethook/) is available.
+Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into Redis SET and DEL commands that are executed against Tile38. Only sinking data is supported. [Check out Tile38](https://tile38.com/)! For streaming (back) into Kafka a [webhook](https://tile38.com/commands/sethook/) is available. This connector supports *at least once semantics*. 
 
 ### Record Formats and Structures
 The following record formats are supported:
