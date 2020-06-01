@@ -7,9 +7,10 @@ Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into
 ### Record Formats and Structures
 The following record formats are supported:
 
-* Avro 
-* JSON with Schema
 * Plain JSON
+* JSON with Schema
+* Avro 
+* Protobuf
 
 ### Topics
 
