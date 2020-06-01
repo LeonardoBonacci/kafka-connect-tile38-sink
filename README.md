@@ -63,6 +63,16 @@ Specified event fields that do not match any topic value field name result in in
 
 Tombstone messages are supported. They compile into [DEL commands](https://tile38.com/commands/del/). 
 
+### Single Message Transformer on ID field
+The ID field (of the SET command) is restrictive. If you're using a Kafka record field of which the string value may consist of multiple words - or, from another perspective, contains spaces - you can use the following single message transformer to remove white spaces before sinking to Tile38:
+
+```
+  "transforms": "RemoveSpaces",
+  "transforms.RemoveSpaces.type":"guru.bonacci.kafka.connect.tile38.transforms.RemoveWhiteSpaces",
+  "transforms.RemoveSpaces.field":"id",
+  "transforms.RemoveSpaces.topic":"fooTopic"
+```
+
 ## Configuration
 
 ### Connector Properties
