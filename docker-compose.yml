@@ -7,7 +7,7 @@ services:
       - "9851:9851"
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.4.0
+    image: confluentinc/cp-zookeeper:5.5.0
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -17,7 +17,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   broker:
-    image: confluentinc/cp-server:5.4.0
+    image: confluentinc/cp-server:5.5.0
     hostname: broker
     container_name: broker
     depends_on:
@@ -40,7 +40,7 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:5.4.0
+    image: confluentinc/cp-schema-registry:5.5.0
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
@@ -53,7 +53,7 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
 
   connect:
-    image: cnfldemos/kafka-connect-datagen:0.2.0-5.4.0
+    image: confluentinc/cp-kafka-connect:5.5.0
     hostname: connect
     container_name: connect
     depends_on:
@@ -100,7 +100,7 @@ services:
         /etc/confluent/docker/run
 
   control-center:
-    image: confluentinc/cp-enterprise-control-center:5.4.0
+    image: confluentinc/cp-enterprise-control-center:5.5.0
     hostname: control-center
     container_name: control-center
     depends_on:
