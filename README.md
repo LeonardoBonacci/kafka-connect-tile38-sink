@@ -2,7 +2,7 @@
 
 ## Usage
 
-Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into Redis SET and DELETE queries that are executed against Tile38. Only sinking data is supported. [Check out Tile38!](https://tile38.com/)
+Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into Redis SET and DEL commands that are executed against Tile38. Only sinking data is supported. [Check out Tile38!](https://tile38.com/). For streaming (back) into Kafka a [webhook](https://tile38.com/commands/sethook/) is available.
 
 ### Record Formats and Structures
 The following record formats are supported:
@@ -13,12 +13,55 @@ The following record formats are supported:
 
 ### Topics
 
-TODO Write something about the topic-command configuration.... 
-Each configured Kafka Connect Tile38 Connector will only output data into a single database instance.
+Note that the Sink instance can be configured to monitor multiple topics. Just evaluate the property *topics* with a list of topic separated by comma. For example:
+```
+{
+  "name": "tile38-sink",
+  "config": {
+    "tasks.max": "1",
+    "connector.class": "guru.bonacci.kafka.connect.tile38.Tile38SinkConnector",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "topics": "fooTopic,barTopic",
+    "tile38.topic.fooTopic": "<YOUR_COMMAND_HERE>",
+    "tile38.topic.barTopic": "<YOUR_COMMAND_HERE>",
+    "tile38.host": "tile38",
+    "tile38.port": 9851
+  }
+}
+
+```
+Each topic configured within the *topics* property is required to have a corresponding command defined, following the pattern *tile38.topic.<topic name>*.
+
+### Commands
+
+Communication with Tile38 happens through the [Redis protocol](https://tile38.com/commands/). Based on each Kafka message that passes the Tile38 Sink Connector generates a [SET command](https://tile38.com/commands/set/). The command pattern is: 
+```
+SET key id [FIELD name value ...] [EX seconds] [NX|XX] (OBJECT geojson)|(POINT lat lon [z])|(BOUNDS minlat minlon maxlat maxlon)|(HASH geohash)|(STRING value)
+```
+This command can be made variable - or record specific - by using tokens of the format *event.my-field*, where *my-field* is the name of a Kafka field in the topic for which this command is specified. The value of Kafka record field *my-field* substitutes *event.my-field*. 
+
+A few examples of syntactically correct commands:
+```
+fleet truck1 POINT 33.5123 -112.2693
+fleet event.id POINT 33.5123 -112.2693
+fleet event.id POINT event.lat event.lat
+fleet event.id FIELD speed event.speed POINT event.latitude event.latitude
+props event.identifier BOUNDS event.southwestlatitude, event.southwestlongitude, event.northeastlatitude, event.northeastlongitude 
+```
+
+Specified event fields that do not match any topic value field name result in invalid commands. This will cause runtime errors. A few hints: 
+- Referring to nested fields is possible using the dot notation, as in *event.nest.my-field*
+- Only value fields are permitted. 
+- The SET word is to be ommitted in the command.
+- *SET fleet truck1 POINT 33.5123 -112.2693* is specified as *fleet truck1 POINT 33.5123 -112.2693*
+- *SET fleet event.id POINT event.lat event.lon* is specified as *fleet event.id POINT event.lat event.lon*
+- Use of the DEL word as the first term is not allowed, as it corresponds with the DEL command.
+
 
 ### Tombstone messages
 
-TODO Write something about tombstone messages....
+Tombstone messages are supported. They compile into [DEL commands](https://tile38.com/commands/del/). 
 
 ## Configuration
 
@@ -48,7 +91,6 @@ tile38.topic.bar | Example command for 'bar' topic | string | | low | anything e
 * curl -X DELETE -H "Content-type: application/json" http://localhost:8083/connectors/tile | jq
 
 # TODO
-* handle id values with spaces
 * batch insert
 * ssl
 
