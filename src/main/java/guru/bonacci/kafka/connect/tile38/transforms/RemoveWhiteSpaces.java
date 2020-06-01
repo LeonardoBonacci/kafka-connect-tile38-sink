@@ -14,30 +14,37 @@ import guru.bonacci.kafka.connect.tile38.writer.RecordConverter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Single Message Transformation that takes CDC records and converts them to use
- * the Simple structure for writing.
+ * Single Message Transformation that takes incoming records and prepares the specified field to be a valid Tile38 id.
  */
 @Slf4j
 public class RemoveWhiteSpaces<R extends ConnectRecord<SinkRecord>> implements Transformation<SinkRecord> {
 
 	private static final String FIELD_CONFIG = "field";
+	private static final String TOPIC_CONFIG = "topic";
 
 	public static final ConfigDef CONFIG_DEF = new ConfigDef()
-			.define(FIELD_CONFIG, ConfigDef.Type.STRING, ConfigDef.NO_DEFAULT_VALUE, ConfigDef.Importance.HIGH, "Field to remove white spaces from.");
+			.define(FIELD_CONFIG, ConfigDef.Type.STRING, ConfigDef.NO_DEFAULT_VALUE, ConfigDef.Importance.HIGH, "Field to remove white spaces from.")
+			.define(TOPIC_CONFIG, ConfigDef.Type.STRING, ConfigDef.NO_DEFAULT_VALUE, ConfigDef.Importance.HIGH, "Apply on this topic.");
 
 
 	private String fieldName;
+	private String topicName;
 
 	
 	@Override
 	public final void configure(Map<String, ?> props) {
 		final SimpleConfig config = new SimpleConfig(CONFIG_DEF, props);
         fieldName = config.getString(FIELD_CONFIG);
+        topicName = config.getString(TOPIC_CONFIG);
     }
 
-	//TODO applies same to records from all topics now
 	@Override
 	public final SinkRecord apply(SinkRecord record) {
+		// Leave records from 'other' topics untouched
+		if (!topicName.equalsIgnoreCase(record.topic())) {
+			return record;
+		}
+		
 		// Leave tombstone records untouched
 		if (record.value() == null) {
 			return record;

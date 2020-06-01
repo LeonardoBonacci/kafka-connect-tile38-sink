@@ -21,16 +21,17 @@ public class RemoveWhiteSpacesTests {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void untouchedString() {
+		final String topic = "some-topic";
 		final String id = "fooid";
 		final String other = "something else";
 		
 		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA).field("other", Schema.STRING_SCHEMA).build();
 		Struct value = new Struct(schema).put("id", id).put("other", other);
 
-		final SinkRecord sinkRecord = new SinkRecord("some-topic", 1, null, null, schema, value, 0);
+		final SinkRecord sinkRecord = new SinkRecord(topic, 1, null, null, schema, value, 0);
 
 		RemoveWhiteSpaces<SinkRecord> transformer = new RemoveWhiteSpaces<>();
-		transformer.configure(ImmutableMap.of("field", "id"));
+		transformer.configure(ImmutableMap.of("field", "id", "topic", topic));
 		SinkRecord transformedRecord = transformer.apply(sinkRecord);
 		transformer.close();
 
@@ -42,15 +43,16 @@ public class RemoveWhiteSpacesTests {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void transformStringInSchemaLess() {
+		final String topic = "some-topic";
 		final String id = " foo id ";
 		final String other = "something else";
 		
 		final Map<String, Object> value = ImmutableMap.of("id", id, "other", other);		
 
-		final SinkRecord sinkRecord = new SinkRecord("some-topic", 1, null, null, null, value, 0);
+		final SinkRecord sinkRecord = new SinkRecord(topic, 1, null, null, null, value, 0);
 
 		RemoveWhiteSpaces<SinkRecord> transformer = new RemoveWhiteSpaces<>();
-		transformer.configure(ImmutableMap.of("field", "id"));
+		transformer.configure(ImmutableMap.of("field", "id", "topic", topic));
 		SinkRecord transformedRecord = transformer.apply(sinkRecord);
 		transformer.close();
 
@@ -62,16 +64,17 @@ public class RemoveWhiteSpacesTests {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void transformNestedInSchemaLess() {
+		final String topic = "some-topic";
 		final String id = " foo id ";
 		final String other = "something else";
 
 		final Map<String, Object> nested = ImmutableMap.of("id", id);		
 		final Map<String, Object> value = ImmutableMap.of("other", other, "nest", nested);		
 
-		final SinkRecord sinkRecord = new SinkRecord("some-topic", 1, null, null, null, value, 0);
+		final SinkRecord sinkRecord = new SinkRecord(topic, 1, null, null, null, value, 0);
 
 		RemoveWhiteSpaces<SinkRecord> transformer = new RemoveWhiteSpaces<>();
-		transformer.configure(ImmutableMap.of("field", "nest.id"));
+		transformer.configure(ImmutableMap.of("field", "nest.id", "topic", topic));
 		SinkRecord transformedRecord = transformer.apply(sinkRecord);
 		transformer.close();
 
@@ -84,16 +87,17 @@ public class RemoveWhiteSpacesTests {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void transformStringInStruct() {
+		final String topic = "some-topic";
 		final String id = " foo id ";
 		final String other = "something else";
 		
 		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA).field("other", Schema.STRING_SCHEMA).build();
 		Struct value = new Struct(schema).put("id", id).put("other", other);
 
-		final SinkRecord sinkRecord = new SinkRecord("some-topic", 1, null, null, schema, value, 0);
+		final SinkRecord sinkRecord = new SinkRecord(topic, 1, null, null, schema, value, 0);
 
 		RemoveWhiteSpaces<SinkRecord> transformer = new RemoveWhiteSpaces<>();
-		transformer.configure(ImmutableMap.of("field", "id"));
+		transformer.configure(ImmutableMap.of("field", "id", "topic", topic));
 		SinkRecord transformedRecord = transformer.apply(sinkRecord);
 		transformer.close();
 
@@ -105,16 +109,17 @@ public class RemoveWhiteSpacesTests {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void transformDouble() {
+		final String topic = "some-topic";
 		final String id = "fooid";
 		final Float other = Float.valueOf(0.21f);
 		
 		Schema schema = SchemaBuilder.struct().field("id", Schema.STRING_SCHEMA).field("other", Schema.FLOAT32_SCHEMA).build();
 		Struct value = new Struct(schema).put("id", id).put("other", other);
 
-		final SinkRecord sinkRecord = new SinkRecord("some-topic", 1, null, null, schema, value, 0);
+		final SinkRecord sinkRecord = new SinkRecord(topic, 1, null, null, schema, value, 0);
 
 		RemoveWhiteSpaces<SinkRecord> transformer = new RemoveWhiteSpaces<>();
-		transformer.configure(ImmutableMap.of("field", "other"));
+		transformer.configure(ImmutableMap.of("field", "other", "topic", topic));
 		SinkRecord transformedRecord = transformer.apply(sinkRecord);
 		transformer.close();
 
@@ -125,14 +130,16 @@ public class RemoveWhiteSpacesTests {
 
 	@Test
 	public void tombstone() {
+		final String topic = "some-topic";
 		final Map<String, Object> key = new HashMap<>();
 		key.put("Id", 1234);
 
 		final Map<String, Object> value = null;
 
-		final SinkRecord sinkRecord = new SinkRecord("some-topic", 1, null, key, null, value, 0);
+		final SinkRecord sinkRecord = new SinkRecord(topic, 1, null, key, null, value, 0);
 
 		RemoveWhiteSpaces<SinkRecord> transformer = new RemoveWhiteSpaces<>();
+		transformer.configure(ImmutableMap.of("field", "other", "topic", topic));
 		SinkRecord transformedRecord = transformer.apply(sinkRecord);
 		transformer.close();
 

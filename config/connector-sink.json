@@ -20,6 +20,7 @@
 
     "transforms": "RemoveSpaces",
     "transforms.RemoveSpaces.type":"guru.bonacci.kafka.connect.tile38.transforms.RemoveWhiteSpaces",
-    "transforms.RemoveSpaces.field":"id"
+    "transforms.RemoveSpaces.field":"id",
+    "transforms.RemoveSpaces.topic":"stations"
   }
 }
