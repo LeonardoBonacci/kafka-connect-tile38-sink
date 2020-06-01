@@ -2,7 +2,7 @@
 
 ## Usage
 
-Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into Redis SET and DEL commands that are executed against Tile38. Only sinking data is supported. [Check out Tile38!](https://tile38.com/). For streaming (back) into Kafka a [webhook](https://tile38.com/commands/sethook/) is available.
+Kafka Connect Tile 38 Sink is a Kafka Connector that translates record data into Redis SET and DEL commands that are executed against Tile38. Only sinking data is supported. [Check out Tile38](https://tile38.com/)! For streaming (back) into Kafka a [webhook](https://tile38.com/commands/sethook/) is available.
 
 ### Record Formats and Structures
 The following record formats are supported:
@@ -55,8 +55,8 @@ Specified event fields that do not match any topic value field name result in in
 - Referring to nested fields is possible using the dot notation, as in *event.nest.my-field*
 - Only value fields are permitted. 
 - The SET word is to be ommitted in the command.
-- *SET fleet truck1 POINT 33.5123 -112.2693* is specified as *fleet truck1 POINT 33.5123 -112.2693*
-- *SET fleet event.id POINT event.lat event.lon* is specified as *fleet event.id POINT event.lat event.lon*
+  - *SET fleet truck1 POINT 33.5123 -112.2693* is specified as *fleet truck1 POINT 33.5123 -112.2693*
+  - *SET fleet event.id POINT event.lat event.lon* is specified as *fleet event.id POINT event.lat event.lon*
 - Use of the DEL word as the first term is not allowed, as it corresponds with the DEL command.
 
 
