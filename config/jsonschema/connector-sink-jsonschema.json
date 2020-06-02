@@ -9,7 +9,7 @@
     "value.converter": "io.confluent.connect.json.JsonSchemaConverter",
     "value.converter.schema.registry.url": "http://schema-registry:8081",
 
-    "tile38.topic.foo": "foo event.bar POINT event.bar1 event.bar2",
+    "tile38.topic.foo": "SET foo event.bar POINT event.bar1 event.bar2",
 
     "tile38.host": "tile38",
     "tile38.port": 9851

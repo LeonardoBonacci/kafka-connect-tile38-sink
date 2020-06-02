@@ -9,7 +9,7 @@
     "value.converter": "io.confluent.connect.protobuf.ProtobufConverter",
     "value.converter.schema.registry.url": "http://schema-registry:8081",
 
-    "tile38.topic.bar": "bar event.bar POINT event.bar1 event.bar2",
+    "tile38.topic.bar": "SET bar event.bar POINT event.bar1 event.bar2",
 
     "tile38.host": "tile38",
     "tile38.port": 9851

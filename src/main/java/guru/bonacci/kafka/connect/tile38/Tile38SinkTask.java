@@ -43,6 +43,11 @@ public class Tile38SinkTask extends SinkTask {
 		this.writer = new Tile38Writer(config);
 	}
 
+	// Number of records here depends on the properties:
+	// fetch.max.bytes
+	// fetch.min.bytes
+	// fetch.wait.max.ms
+	// max.poll.records
 	@Override
 	public void put(Collection<SinkRecord> records) {
 		log.trace("Putting {} records to Tile38", records.size());

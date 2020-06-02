@@ -9,8 +9,8 @@
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "false",
 
-    "tile38.topic.stations": "station event.id POINT event.latitude event.longitude",
-    "tile38.topic.trains": "train event.id FIELD route event.route POINT event.lat event.lon",
+    "tile38.topic.stations": "SET station event.id POINT event.latitude event.longitude",
+    "tile38.topic.trains": "SET train event.id FIELD route event.route POINT event.lat event.lon",
 
     "tile38.host": "tile38",
     "tile38.port": 9851,
