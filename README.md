@@ -98,7 +98,3 @@ tile38.topic.bar | Example command for 'bar' topic | string | | low | anything e
 * curl localhost:8083/connectors | jq
 * curl -X DELETE -H "Content-type: application/json" http://localhost:8083/connectors/tile38-sink | jq
 
-# TODO
-* batch insert
-* ssl
-
