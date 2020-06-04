@@ -18,7 +18,7 @@ import org.apache.kafka.connect.sink.SinkTask;
 import guru.bonacci.kafka.connect.tile38.config.Tile38SinkConnectorConfig;
 import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
 import guru.bonacci.kafka.connect.tile38.writer.Tile38Writer;
-import io.lettuce.core.RedisCommandExecutionException;
+import io.lettuce.core.RedisException;
 import io.lettuce.core.RedisFuture;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -80,11 +80,14 @@ public class Tile38SinkTask extends SinkTask {
 				throw new RetriableException(
 						String.format("Timeout after %s ms while waiting for operation to complete.", config.getFlushTimeOut()));
 			}
-		} catch (RedisCommandExecutionException e) {
+		} catch (RedisException e) { //Lettuce wraps ExecutionException and InterruptedException 
+			log.warn(e.getMessage());
+			throw new RetriableException(e);
+		} catch (RuntimeException e) {
 			log.warn(e.getMessage());
 			if (FAIL.equals(config.getBehaviorOnError())) {
 				throw new ConnectException(e);
-			}
+			} 
 		}
 	}
 
