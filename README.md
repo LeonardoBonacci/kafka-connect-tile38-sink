@@ -83,6 +83,12 @@ flush.timeout.ms | Used for periodic flushing | int | 10000 | low | 1234
 behavior.on.error | Error handling behavior | string | FAIL | medium | LOG or FAIL
 tile38.topic.foo | Example command for 'foo' topic | string | | low | foo event.id FIELD route event.route POINT event.lat event.lon
 tile38.topic.bar | Example command for 'bar' topic | string | | low | anything event.the_key POINT event.latitude event.longitude
+and | some | more | lettuce | connection | settings | 
+socket.tcp.no.delay.enabled | Use TCP-no-delay
+socket.keep.alive.enabled | Enable keepalive
+socket.connect.timeout.ms | Wait ms before socket timeout.
+request.queue.size | Max number of queued requests
+auto.reconnect.enabled | Redis client automatic reconnect 
 
 # Build and run info
 
