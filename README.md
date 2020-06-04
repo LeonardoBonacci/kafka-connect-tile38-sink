@@ -83,7 +83,7 @@ flush.timeout.ms | Used for periodic flushing | int | 10000 | low | 1234
 behavior.on.error | Error handling behavior | string | FAIL | medium | LOG or FAIL
 tile38.topic.foo | Example command for 'foo' topic | string | | low | foo event.id FIELD route event.route POINT event.lat event.lon
 tile38.topic.bar | Example command for 'bar' topic | string | | low | anything event.the_key POINT event.latitude event.longitude
-and | a | few | boring | connection | settings 
+***and*** | ***a*** | ***few*** | ***boring*** | ***connection*** | ***settings***
 socket.tcp.no.delay.enabled | Use TCP-no-delay | boolean | false | low |
 socket.keep.alive.enabled | Enable keepalive | boolean | false | low |
 socket.connect.timeout.ms | Wait ms before socket timeout | long | 10000 | low |
