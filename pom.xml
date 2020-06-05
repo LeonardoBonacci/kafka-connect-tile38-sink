@@ -14,11 +14,11 @@
 
 	<groupId>guru.bonacci.tile38.connect</groupId>
 	<artifactId>kafka-connect-tile38-sink</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>kafka-connect-tile38-sink</name>
-	<description>A Kafka Connect Tile38 Connector</description>
+	<description>A Kafka Connect Tile38 Sink Connector</description>
 	<url>https://github.com/LeonardoBonacci/kafka-connect-tile38-sink</url>
 
 	<issueManagement>
