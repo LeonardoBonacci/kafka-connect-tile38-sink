@@ -5,6 +5,9 @@ services:
     image: tile38/tile38:1.21.1
     ports:
       - "9851:9851"
+    volumes:
+    # for password config
+      - ./tile38/data:/data  
 
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.0

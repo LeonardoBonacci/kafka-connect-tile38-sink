@@ -14,6 +14,7 @@
 
     "tile38.host": "tile38",
     "tile38.port": 9851,
+    "tile38.password": "foo123",
 
     "behavior.on.error": "log",
     "flush.timeout.ms": "1000",

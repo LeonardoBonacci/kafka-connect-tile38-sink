@@ -76,11 +76,12 @@ The ID field (of the SET command) is restrictive. If you're using a Kafka record
 ### Connector Properties
 Name |	Description	| Type	| Default |	Importance | Example
 ------------ | ------------- | ------------- | ------------- | ------------- | -------------
-tile38.host	| Tile38 server host. | string | localhost |	high | localhost 
-tile38.port |	Tile38 server host port number. | int | 9851 |	high | 9851
+tile38.host	| Tile38 server host | string | localhost |	high | localhost 
+tile38.port |	Tile38 server host port number | int | 9851 |	high | 9851
 topics | Kafka topics read by the connector | comma-separated string | | high | foo,bar
 flush.timeout.ms | Used for periodic flushing | int | 10000 | low | 1234
 behavior.on.error | Error handling behavior | string | FAIL | medium | LOG or FAIL
+tile38.password | Tile38's password | string | "" | low | foo123
 tile38.topic.foo | Example command for 'foo' topic | string | | low | foo event.id FIELD route event.route POINT event.lat event.lon
 tile38.topic.bar | Example command for 'bar' topic | string | | low | anything event.the_key POINT event.latitude event.longitude
 ***and*** | ***a*** | ***few*** | ***boring*** | ***connection*** | ***settings***
@@ -99,7 +100,8 @@ auto.reconnect.enabled | Redis client automatic reconnect | boolean | true | low
 * curl -X POST -H "Content-Type: application/json" --data @config/connector-sink.json http://localhost:8083/connectors | jq
 * Kafka topic: 'stations' and 'trains'
 * At last: docker run --net=host -it tile38/tile38 tile38-cli
-* Run 'scan station' and 'scan train'
+* Run 'auth foo123'
+* Then run 'scan station' and/or 'scan train'
 
 * curl localhost:8083/connectors | jq
 * curl -X DELETE -H "Content-type: application/json" http://localhost:8083/connectors/tile38-sink | jq

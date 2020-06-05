@@ -186,7 +186,8 @@
 							<title>Kafka Connect Tile38</title>
 							<documentationUrl>${project.url}/blob/master/README.md</documentationUrl>
 							<logo>docs/logos/tile38-logo.png</logo>
-							<ownerUsername>leonardobonacci</ownerUsername>
+ 							<ownerLogo>docs/logos/leonardobonacci.jpg</ownerLogo>
+ 							<ownerUsername>leonardobonacci</ownerUsername>
 							<ownerType>user</ownerType>
 							<ownerName>Jeffrey van Helden</ownerName>
 							<ownerUrl>https://github.com/LeonardoBonacci</ownerUrl>

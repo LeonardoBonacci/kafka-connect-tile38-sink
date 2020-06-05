@@ -16,11 +16,16 @@
 package guru.bonacci.kafka.connect.tile38.writer;
 
 import static guru.bonacci.kafka.connect.tile38.commands.CommandGenerator.from;
+import static io.lettuce.core.codec.StringCodec.UTF8;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.time.Duration;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
+
+import org.apache.kafka.connect.errors.ConnectException;
 
 import guru.bonacci.kafka.connect.tile38.commands.CommandGenerators;
 import guru.bonacci.kafka.connect.tile38.commands.CommandTemplates;
@@ -30,11 +35,16 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.api.async.RedisAsyncCommands;
+import io.lettuce.core.output.StatusOutput;
+import io.lettuce.core.protocol.CommandArgs;
+import io.lettuce.core.protocol.CommandType;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class Tile38Writer {
 
-	@Getter private final RedisClient client; // for testing
+	@Getter private final RedisClient client; // getter for testing
 	private final RedisAsyncCommands<String, String> async;
 
 	private final CommandGenerators cmds;
@@ -55,8 +65,23 @@ public class Tile38Writer {
     			String.format("redis://%s:%d", config.getHost(), config.getPort()));
 	    this.client.setOptions(clientOptions.build());
 
-	    // disable auto-flushing to allow for batch inserts
 		this.async = client.connect().async();
+		
+		// authenticate
+		if (isNotBlank(config.getTile38Password())) {
+			try {
+				String authenticated = async.dispatch(
+					CommandType.AUTH,
+				    new StatusOutput<>(UTF8), 
+				    new CommandArgs<>(UTF8).add(config.getTile38Password()))
+				.get();
+				log.info("Authentication: {}", authenticated);
+			} catch (InterruptedException | ExecutionException e) {
+				new ConnectException("Failed to establish a connection to Tile38", e);
+			}
+		}	
+
+	    // disable auto-flushing to allow for batch inserts
 		this.async.setAutoFlushCommands(false);
 		
 		final CommandTemplates cmdTemplates = config.getCmdTemplates();

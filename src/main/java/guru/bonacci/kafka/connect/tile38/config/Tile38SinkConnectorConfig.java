@@ -52,6 +52,9 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	public static final String BEHAVIOR_ON_ERROR = "behavior.on.error";
 	private static final String BEHAVIOR_ON_ERROR_DOC = "Error handling behavior setting. Valid options are 'LOG' and 'FAIL'.";
 
+	public static final String TILE38_PASSWORD = "tile38.password";
+	private static final String TILE38_PASSWORD_DOC = "Authentication in a password-protected Tile38 server.";
+	
 	public static final String SOCKET_TCP_NO_DELAY = "socket.tcp.no.delay.enabled";
 	private static final String SOCKET_TCP_NO_DELAY_DOC = "Use TCP-no-delay.";
 
@@ -68,8 +71,8 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	private static final String AUTO_RECONNECT_DOC = "Lets the Redis client reconnect automatically.";
 
 
-	@Getter	TopicsConfig topicsConfig;
-	@Getter	CommandTemplates cmdTemplates;
+	@Getter	private TopicsConfig topicsConfig;
+	@Getter	private CommandTemplates cmdTemplates;
 
 	
 	public Tile38SinkConnectorConfig(Map<String, String> props) {
@@ -108,6 +111,7 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 				.define(TILE38_PORT, Type.INT, 9851, Importance.HIGH, TILE38_PORT_DOC)
 				.define(BEHAVIOR_ON_ERROR, Type.STRING, BehaviorOnErrorValues.DEFAULT.toString(), BehaviorOnErrorValues.VALIDATOR, Importance.MEDIUM, BEHAVIOR_ON_ERROR_DOC)
 				.define(FLUSH_TIMEOUT, Type.INT, 10000, Importance.LOW, FLUSH_TIMEOUT_DOC)
+				.define(TILE38_PASSWORD, Type.STRING, "", Importance.LOW, TILE38_PASSWORD_DOC)
 				.define(SOCKET_TCP_NO_DELAY, Type.BOOLEAN, SocketOptions.DEFAULT_SO_NO_DELAY, Importance.LOW, SOCKET_TCP_NO_DELAY_DOC)
 				.define(SOCKET_KEEP_ALIVE, Type.BOOLEAN, SocketOptions.DEFAULT_SO_KEEPALIVE, Importance.LOW, SOCKET_KEEP_ALIVE_DOC)
 				.define(SOCKET_CONNECT_TIMEOUT, Type.LONG, SocketOptions.DEFAULT_CONNECT_TIMEOUT_DURATION.toMillis(), Importance.LOW, SOCKET_CONNECT_TIMEOUT_DOC)
@@ -125,6 +129,10 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 	
 	public Integer getFlushTimeOut() {
 		return this.getInt(FLUSH_TIMEOUT);
+	}
+
+	public String getTile38Password() {
+		return this.getString(TILE38_PASSWORD);
 	}
 
 	public Boolean getTcpNoDelay() {

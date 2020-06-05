@@ -12,6 +12,7 @@
     "tile38.topic.bar": "SET bar event.bar POINT event.bar1 event.bar2",
 
     "tile38.host": "tile38",
-    "tile38.port": 9851
+    "tile38.port": 9851,
+    "tile38.password": "foo123"
   }
 }
