@@ -19,6 +19,21 @@
 
 	<name>kafka-connect-tile38-sink</name>
 	<description>A Kafka Connect Tile38 Connector</description>
+	<url>https://github.com/LeonardoBonacci/kafka-connect-tile38-sink</url>
+
+	<issueManagement>
+		<system>GitHub</system>
+		<url>${project.url}/issues</url>
+	</issueManagement>
+
+	<developers>
+		<developer>
+			<id>leonardobonacci</id>
+			<name>Jeffrey van Helden</name>
+			<url>https://github.com/LeonardoBonacci/kafka-connect-tile38-sink</url>
+			<timezone>+12</timezone>
+		</developer>
+	</developers>
 
 	<properties>
 		<kafka.version>2.5.0</kafka.version>
@@ -158,6 +173,46 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>io.confluent</groupId>
+				<artifactId>kafka-connect-maven-plugin</artifactId>
+				<version>0.11.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>kafka-connect</goal>
+						</goals>
+						<configuration>
+							<title>Kafka Connect Tile38</title>
+							<documentationUrl>${project.url}/blob/master/README.md</documentationUrl>
+							<logo>docs/logos/tile38-logo.png</logo>
+							<ownerUsername>leonardobonacci</ownerUsername>
+							<ownerType>user</ownerType>
+							<ownerName>Jeffrey van Helden</ownerName>
+							<ownerUrl>https://github.com/LeonardoBonacci</ownerUrl>
+							<supportProviderName>Open Source Community</supportProviderName>
+							<supportSummary>Support provided through community involvement.</supportSummary>
+							<supportUrl>${project.issueManagement.url}</supportUrl>
+							<componentTypes>
+								<componentType>sink</componentType>
+							</componentTypes>
+							<requirements>
+								<requirement>Tile38 1.21.1+</requirement>
+							</requirements>
+							<tags>
+								<tag>tile38</tag>
+								<tag>geospatial</tag>
+								<tag>database</tag>
+								<tag>geofencing</tag>
+							</tags>
+						   <deliveryGuarantee>
+                                <deliveryGuarantee>atLeastOnce</deliveryGuarantee>
+                            </deliveryGuarantee>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
@@ -169,7 +224,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.5.3</version>
+				<version>3.3.0 </version>
 				<configuration>
 					<descriptors>
 						<descriptor>src/main/assembly/package.xml</descriptor>
