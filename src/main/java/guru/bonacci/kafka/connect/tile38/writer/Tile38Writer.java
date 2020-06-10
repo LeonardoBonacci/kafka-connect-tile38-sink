@@ -22,9 +22,11 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Stream;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.kafka.connect.errors.ConnectException;
 
 import guru.bonacci.kafka.connect.tile38.commands.CommandGenerators;
@@ -35,6 +37,7 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.api.async.RedisAsyncCommands;
+import io.lettuce.core.output.CommandOutput;
 import io.lettuce.core.output.StatusOutput;
 import io.lettuce.core.protocol.CommandArgs;
 import io.lettuce.core.protocol.CommandType;
@@ -91,16 +94,32 @@ public class Tile38Writer {
     }
 
 
-	public RedisFuture<?>[] write(Stream<Tile38Record> records) {
-		final RedisFuture<?>[] futures = records
+	public RedisFuture<?>[] write(List<Tile38Record> records) {
+		final RedisFuture<?>[] futures = records.stream()
 				.map(event -> cmds.generatorForTopic(event.getTopic()).compile(event)) // create command
 				.map(cmd -> async.dispatch(cmd.getLeft(), cmd.getMiddle(), cmd.getRight())) // execute command
 				.toArray(RedisFuture[]::new); // collect futures
 
+		final RedisFuture<?>[] moreFutures = records.stream()
+			.map(event -> expire(event))
+			.map(cmd -> async.dispatch(cmd.getLeft(), cmd.getMiddle(), cmd.getRight()))
+			.toArray(RedisFuture[]::new); 
+
 		// async batch insert
 		async.flushCommands();
-		return futures;
+		return ArrayUtils.addAll(futures, moreFutures);
     }
+
+	Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> expire(final Tile38Record record) {
+		final Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> generatedCmd;
+		final CommandArgs<String, String> cmdArgs = new CommandArgs<>(UTF8);
+		cmdArgs.add("train"); //key
+		cmdArgs.add(record.getId()); //id
+		cmdArgs.add(5); //seconds
+		generatedCmd = Triple.of(CommandType.EXPIRE, new StatusOutput<>(UTF8), cmdArgs);
+		log.error("Compiled to: {} {}", generatedCmd.getLeft(), cmdArgs.toCommandString());
+	    return generatedCmd;
+	}
 
     public void close() {
 		client.shutdown();
