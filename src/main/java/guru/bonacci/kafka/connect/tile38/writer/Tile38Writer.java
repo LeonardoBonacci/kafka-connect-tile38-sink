@@ -37,6 +37,7 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.api.async.RedisAsyncCommands;
+import io.lettuce.core.output.BooleanOutput;
 import io.lettuce.core.output.CommandOutput;
 import io.lettuce.core.output.StatusOutput;
 import io.lettuce.core.protocol.CommandArgs;
@@ -113,10 +114,10 @@ public class Tile38Writer {
 	Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> expire(final Tile38Record record) {
 		final Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> generatedCmd;
 		final CommandArgs<String, String> cmdArgs = new CommandArgs<>(UTF8);
-		cmdArgs.add("train"); //key
+		cmdArgs.add("foo"); //key
 		cmdArgs.add(record.getId()); //id
-		cmdArgs.add(5); //seconds
-		generatedCmd = Triple.of(CommandType.EXPIRE, new StatusOutput<>(UTF8), cmdArgs);
+		cmdArgs.add(3); //seconds
+		generatedCmd = Triple.of(CommandType.EXPIRE, new BooleanOutput<>(UTF8), cmdArgs);
 		log.error("Compiled to: {} {}", generatedCmd.getLeft(), cmdArgs.toCommandString());
 	    return generatedCmd;
 	}
