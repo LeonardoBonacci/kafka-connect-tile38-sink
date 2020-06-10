@@ -52,6 +52,9 @@ public class CommandTemplate {
 	// These terms are substituted in dynamic command generation
 	// example: {event.id, event.rou, event.lat, event.lon}
 	private final Set<String> terms;
+
+	// TODO comment
+	private final Integer expirationInSec;
 	
 	/**
 	 * Command format:
@@ -84,6 +87,6 @@ public class CommandTemplate {
 		// remove all command terms that do not start with 'event.'
 		terms.removeIf(s -> !s.startsWith(TOKERATOR));
 
-	    return new CommandTemplate(cmdStringWithoutSet, keyAndCmdString[0], terms);
+	    return new CommandTemplate(cmdStringWithoutSet, keyAndCmdString[0], terms, 3);
 	}
 }

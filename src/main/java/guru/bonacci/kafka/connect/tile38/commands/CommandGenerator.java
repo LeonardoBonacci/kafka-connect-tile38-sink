@@ -33,6 +33,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.kafka.connect.errors.DataException;
 
 import guru.bonacci.kafka.connect.tile38.writer.Tile38Record;
+import io.lettuce.core.output.BooleanOutput;
 import io.lettuce.core.output.CommandOutput;
 import io.lettuce.core.output.IntegerOutput;
 import io.lettuce.core.output.StatusOutput;
@@ -51,13 +52,23 @@ public class CommandGenerator {
 	private final CommandTemplate cmd;
 
 	/**
-	 * Generates a Redis command based on a record's key and/or value.
+ 	 * Combines a SET or DEL with a possible EXPIRE command
+	 */
+	public CommandResult compile(final Tile38Record record) {
+	    return CommandResult.builder()
+	    					.setOrDel(setOrDelCmd(record))
+	    					.expire(expireCmd(record))
+	    					.build();
+	}
+
+	/**
+	 * Generates a Redis command based on a record value.
 	 * Sending a command with Lettuce requires three arguments:
 	 * 1. CommandType: SET or DEL
 	 * 2. CommandOutput: Lettuce forces one to anticipate on the result data type
 	 * 3. CommandArgs: The actual command terms
 	 */
-	public Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> compile(final Tile38Record record) {
+	private Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> setOrDelCmd(final Tile38Record record) {
 		final Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> generatedCmd;
 		final CommandArgs<String, String> cmdArgs = new CommandArgs<>(UTF8);
 
@@ -75,6 +86,29 @@ public class CommandGenerator {
 			generatedCmd = of(CommandType.DEL, new IntegerOutput<>(UTF8), cmdArgs);
 		}
 			
+		log.trace("Compiled to: {} {}", generatedCmd.getLeft(), cmdArgs.toCommandString());
+	    return generatedCmd;
+	}
+
+	/**
+	 * Generates a Redis command based on a record value.
+	 * Sending a command with Lettuce requires three arguments:
+	 * 1. CommandType: EXPIRE
+	 * 2. CommandOutput: Lettuce forces one to anticipate on the result data type
+	 * 3. CommandArgs: The actual command terms
+	 */
+	private Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> expireCmd(final Tile38Record record) {
+		// no expiration or a tombstone record
+		if (cmd.getExpirationInSec() == null || record.getValue() == null) {
+			return null;
+		}
+			
+		final Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> generatedCmd;
+		final CommandArgs<String, String> cmdArgs = new CommandArgs<>(UTF8);
+		cmdArgs.add(cmd.getKey()); 
+		cmdArgs.add(record.getId()); 
+		cmdArgs.add(cmd.getExpirationInSec()); 
+		generatedCmd = Triple.of(CommandType.EXPIRE, new BooleanOutput<>(UTF8), cmdArgs);
 		log.trace("Compiled to: {} {}", generatedCmd.getLeft(), cmdArgs.toCommandString());
 	    return generatedCmd;
 	}

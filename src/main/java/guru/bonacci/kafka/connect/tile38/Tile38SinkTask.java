@@ -20,9 +20,7 @@ import static io.lettuce.core.LettuceFutures.awaitAll;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -78,10 +76,9 @@ public class Tile38SinkTask extends SinkTask {
 				.withSinkRecords(records)
 				.build();
 
-		List<Tile38Record> rec = recordStream.collect(Collectors.toList());
-		final RedisFuture<?>[] futures = writer.write(rec);
-		
+		final RedisFuture<?>[] futures = writer.write(recordStream);
 		wait(futures);
+
 		log.trace(futures.length + " commands executed");
 	}
 
