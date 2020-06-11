@@ -230,7 +230,9 @@ public class Tile38SinkTaskIT {
 	@Test
 	public void expireMany() throws InterruptedException {
 		final String topic = "foo";
-	    this.task.start(provideConfig(topic));
+		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
+		config.put("tile38.topic.foo.expire", "2");
+		this.task.start(config);
 
 		final String id = "fooid";
 		Schema schema = getRouteSchema();
