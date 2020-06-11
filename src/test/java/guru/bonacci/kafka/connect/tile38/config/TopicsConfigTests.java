@@ -27,17 +27,19 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-import guru.bonacci.kafka.connect.tile38.config.TopicsConfig;
-
 public class TopicsConfigTests {
 
-	public static TopicsConfig provideTopics() {
-		return TopicsConfig.from(ImmutableMap.of(
+	public static Map<String, String> provideConfig() {
+		return ImmutableMap.of(
 				"key.converter", "org.apache.kafka.connect.storage.StringConverter", 
 				"value.converter", "org.apache.kafka.connect.storage.StringConverter", 
 			    "topics", "foo,bar",
 			    "tile38.topic.foo", "SET foo event.query event.here",
-		    	"tile38.topic.bar", "set bar event.bar query here event.there"));
+		    	"tile38.topic.bar", "set bar event.bar query here event.there");
+	}
+
+	public static TopicsConfig provideTopics() {
+		return TopicsConfig.from(provideConfig());
 	}
 
 	@Test

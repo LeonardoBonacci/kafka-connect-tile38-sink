@@ -29,6 +29,7 @@ import org.apache.kafka.common.config.ConfigException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 /**
@@ -53,8 +54,10 @@ public class CommandTemplate {
 	// example: {event.id, event.rou, event.lat, event.lon}
 	private final Set<String> terms;
 
-	// TODO comment
-	private final Integer expirationInSec;
+	// Expiration time in seconds.
+	// example: 5
+	@Setter private Integer expirationInSec = null;
+
 	
 	/**
 	 * Command format:
@@ -87,6 +90,6 @@ public class CommandTemplate {
 		// remove all command terms that do not start with 'event.'
 		terms.removeIf(s -> !s.startsWith(TOKERATOR));
 
-	    return new CommandTemplate(cmdStringWithoutSet, keyAndCmdString[0], terms, 3);
+	    return new CommandTemplate(cmdStringWithoutSet, keyAndCmdString[0], terms);
 	}
 }

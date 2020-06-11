@@ -24,4 +24,5 @@ public class Constants {
 	public static final String SET_TERM = "SET";
 	
 	public static final String COMMAND_PREFIX = "tile38.topic.";
+	public static final String EXPIRE_SUFFIX = ".expire";
 }
