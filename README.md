@@ -63,7 +63,6 @@ Specified event fields that do not match any topic value field name result in in
 tile38.topic.foo=SET foo event.id FIELD route event.route POINT event.lat event.lon
 tile38.topic.foo.expire=5
 ```
-**Warning! This functionality only works when the Kafka topic name is equal to the Tile38 key.** 
 
 ### Tombstone messages
 
