@@ -90,7 +90,7 @@ flush.timeout.ms | Used for periodic flushing | int | 10000 | low | 1234
 behavior.on.error | Error handling behavior | string | FAIL | medium | LOG or FAIL
 tile38.password | Tile38's password | string | "" | low | foo123
 tile38.topic.foo | Example command for 'foo' topic | string | | low | SET foo event.id FIELD route event.route POINT event.lat event.lon
-tile38.topic.foo.expire | Expire time for 'foo' keyed id's | int | | low | 5 
+tile38.topic.foo.expire | Expire time for elements from 'foo' topic | int | | low | 5 
 tile38.topic.bar | Example command for 'bar' topic | string | | low | SET anything event.the_key POINT event.latitude event.longitude
 ***and*** | ***a*** | ***few*** | ***boring*** | ***connection*** | ***settings***
 socket.tcp.no.delay.enabled | Use TCP-no-delay | boolean | false | low |
