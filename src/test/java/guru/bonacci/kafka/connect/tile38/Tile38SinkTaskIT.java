@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -34,6 +35,7 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
+import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -196,6 +198,7 @@ public class Tile38SinkTaskIT {
 		assertThat(resp, is(equalTo(route)));
 	}
 
+	@Test
 	public void nestedWrite() {
 		final String lat = "4.56", lon = "7.89";
 	    final String topic = "foo";
@@ -224,6 +227,34 @@ public class Tile38SinkTaskIT {
 		assertThat(parser.parse(resp), is(equalTo(parser.parse(String.format(RESULT_STRING, lon, lat)))));
 	}
 
+	@Test
+	public void expireMany() throws InterruptedException {
+		final String topic = "foo";
+		Map<String, String> config = Maps.newHashMap(provideConfig(topic));
+		config.put("tile38.topic.foo.expire", "2");
+		this.task.start(config);
+
+		final String id = "fooid";
+		Schema schema = getRouteSchema();
+
+		final List<SinkRecord> records = new ArrayList<>();
+		for (int i=0; i<100; i++) {
+			Struct value = new Struct(schema).put("id", id+i).put("route", ""+i).put("lat", ""+1.01*i).put("lon", ""+-1.01*i);
+			records.add(write(topic, Schema.STRING_SCHEMA, id, schema, value));
+		}	
+		this.task.put(records);
+
+		// sleep longer than x seconds
+		Thread.sleep(5000);
+
+		RedisCommands<String, String> sync = this.task.getWriter().getClient().connect().sync();
+		for (int i=0; i<100; i++) {
+			CommandArgs<String, String> get = getFooCommand(id);
+			String resp = sync.dispatch(CommandType.GET, new StatusOutput<>(StringCodec.UTF8), get);
+			Assert.assertNull(resp);
+		}	
+	}
+	
 	private static Stream<Arguments> provideForIgnoredFieldWrite() {
 	    return Stream.of(
 	      Arguments.of("0", "0.1", "1.0"),

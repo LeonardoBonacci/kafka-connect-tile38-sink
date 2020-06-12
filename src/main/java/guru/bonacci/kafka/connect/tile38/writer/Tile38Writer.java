@@ -22,12 +22,14 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
 import org.apache.kafka.connect.errors.ConnectException;
 
 import guru.bonacci.kafka.connect.tile38.commands.CommandGenerators;
+import guru.bonacci.kafka.connect.tile38.commands.CommandResult;
 import guru.bonacci.kafka.connect.tile38.commands.CommandTemplates;
 import guru.bonacci.kafka.connect.tile38.config.Tile38SinkConnectorConfig;
 import io.lettuce.core.ClientOptions;
@@ -93,7 +95,9 @@ public class Tile38Writer {
 
 	public RedisFuture<?>[] write(Stream<Tile38Record> records) {
 		final RedisFuture<?>[] futures = records
-				.map(event -> cmds.generatorForTopic(event.getTopic()).compile(event)) // create command
+				.map(event -> cmds.generatorForTopic(event.getTopic()).compile(event)) // create command(s)
+				.flatMap(CommandResult::asStream)
+				.filter(Objects::nonNull) // non-expire commands are null
 				.map(cmd -> async.dispatch(cmd.getLeft(), cmd.getMiddle(), cmd.getRight())) // execute command
 				.toArray(RedisFuture[]::new); // collect futures
 

@@ -97,7 +97,7 @@ public class CommandGeneratorTests {
 		Tile38Record internalRecord = new RecordConverter().convert(rec);
 
 		Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> result = CommandGenerator.from(
-				CommandTemplate.from(cmdString)).compile(internalRecord);
+				CommandTemplate.from(cmdString)).compile(internalRecord).getSetOrDel();
 
 	    assertThat(result.getLeft(), is(equalTo(CommandType.SET)));
 	    assertThat(result.getRight().toCommandString(), is(equalTo("bla some id is to be sub nest.event.foo and nest.event.bar more")));
@@ -123,7 +123,7 @@ public class CommandGeneratorTests {
 		Tile38Record internalRecord = new RecordConverter().convert(rec);
 
 		Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> result = CommandGenerator.from(
-				CommandTemplate.from(cmdString)).compile(internalRecord);
+				CommandTemplate.from(cmdString)).compile(internalRecord).getSetOrDel();
 
 	    assertThat(result.getLeft(), is(equalTo(CommandType.DEL)));
 	    assertThat(result.getRight().toCommandString(), is(equalTo("bla thekey")));
@@ -178,7 +178,7 @@ public class CommandGeneratorTests {
 		Tile38Record internalRecord = new RecordConverter().convert(rec);
 
 		Triple<CommandType, CommandOutput<String, String, ?>, CommandArgs<String, String>> result = CommandGenerator.from(
-				CommandTemplate.from(cmdString)).compile(internalRecord);
+				CommandTemplate.from(cmdString)).compile(internalRecord).getSetOrDel();
 
 	    assertThat(result.getLeft(), is(equalTo(CommandType.SET)));
 	    assertThat(result.getRight().toCommandString(), is(equalTo("foo one POINT 12.34 56.78")));

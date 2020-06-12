@@ -15,12 +15,23 @@
  */
 package guru.bonacci.kafka.connect.tile38.commands;
 
+import static com.google.common.collect.Maps.filterKeys;
 import static com.google.common.collect.Maps.immutableEntry;
+import static guru.bonacci.kafka.connect.tile38.Constants.EXPIRE_SUFFIX;
+import static java.lang.Integer.valueOf;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static lombok.AccessLevel.PRIVATE;
+import static org.apache.commons.lang3.StringUtils.removeEnd;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
+
+import org.apache.kafka.common.config.ConfigException;
+
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 
 import guru.bonacci.kafka.connect.tile38.config.TopicsConfig;
 import lombok.RequiredArgsConstructor;
@@ -45,17 +56,35 @@ public class CommandTemplates {
 	}
 	
 	public static CommandTemplates from(TopicsConfig topics) {
-		Map<String, String> cmdsByTopic = topics.getCmdsByTopic();
+		final Map<String, String> cmdsByTopic = topics.getCmdsByTopic();
 		log.info("Creating command template data structure for {}", cmdsByTopic);
 		
+		// split the map in commands and expiration configs
+		final Predicate<String> isExpire = key -> key.endsWith(EXPIRE_SUFFIX);
+		final Map<String, String> expires = filterKeys(cmdsByTopic, Predicates.and(isExpire));
+		final Map<String, String> cmds = filterKeys(cmdsByTopic, Predicates.not(isExpire));
+
+		// create templates from command strings
 		// in -> key: topic name - value: command string
-		Map<String, CommandTemplate> cmdTemplates = 
-				cmdsByTopic.entrySet().stream().map(cmdForTopic -> {
+		final Map<String, CommandTemplate> cmdTemplates = 
+				cmds.entrySet().stream().map(cmdForTopic -> {
 					CommandTemplate cmd = CommandTemplate.from(cmdForTopic.getValue());
 				    return immutableEntry(cmdForTopic.getKey(), cmd);
 				})
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+		// add the expiration times to the templates
+		for (Entry<String, String> expire : expires.entrySet()) {
+			String expireTopicKey = removeEnd(expire.getKey(), EXPIRE_SUFFIX);
+			try {
+				cmdTemplates.computeIfAbsent(expireTopicKey, s -> { throw new IllegalArgumentException(); });
+				cmdTemplates.get(expireTopicKey).setExpirationInSec(valueOf(expire.getValue()));
+			} catch (IllegalArgumentException e) {
+				throw new ConfigException(
+						format("Error expire config for topic '%s'. Invalid value '%s'. Check the docs!", expireTopicKey, expire.getValue()));
+			}	
+		}
+		
 		// out -> key: topic name - value: command template
 		return new CommandTemplates(cmdTemplates);
 	}

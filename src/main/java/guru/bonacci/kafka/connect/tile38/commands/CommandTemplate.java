@@ -29,6 +29,7 @@ import org.apache.kafka.common.config.ConfigException;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 /**
@@ -52,6 +53,11 @@ public class CommandTemplate {
 	// These terms are substituted in dynamic command generation
 	// example: {event.id, event.rou, event.lat, event.lon}
 	private final Set<String> terms;
+
+	// Expiration time in seconds.
+	// example: 5
+	@Setter private Integer expirationInSec = null;
+
 	
 	/**
 	 * Command format:

@@ -77,8 +77,8 @@ public class Tile38SinkTask extends SinkTask {
 				.build();
 
 		final RedisFuture<?>[] futures = writer.write(recordStream);
-		
 		wait(futures);
+
 		log.trace(futures.length + " commands executed");
 	}
 

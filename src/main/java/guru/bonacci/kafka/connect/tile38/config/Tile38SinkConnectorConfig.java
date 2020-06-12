@@ -16,6 +16,7 @@
 package guru.bonacci.kafka.connect.tile38.config;
 
 import static com.google.common.collect.Sets.symmetricDifference;
+import static guru.bonacci.kafka.connect.tile38.Constants.EXPIRE_SUFFIX;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
@@ -98,7 +99,8 @@ public class Tile38SinkConnectorConfig extends AbstractConfig {
 				: emptySet();
 				 
         Set<String> configuredTopics = this.topicsConfig.configuredTopics();
-
+        configuredTopics.removeIf(topicName -> topicName.endsWith(EXPIRE_SUFFIX));
+        
         if (!symmetricDifference(topics, configuredTopics).isEmpty()) {
             throw new ConfigException(format("There is a mismatch between topics defined into the property 'topics' %s and configured topics %s", 
             		topics, configuredTopics));
