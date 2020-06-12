@@ -56,6 +56,14 @@ Specified event fields that do not match any topic value field name result in in
 - Only value fields are permitted. 
 - Using anything other than a SET command is not supported at this stage.
 
+### Expire
+
+[Expire](https://tile38.com/commands/expire/) functionality is available. The unit is seconds. How to use it:
+```
+tile38.topic.foo=SET foo event.id FIELD route event.route POINT event.lat event.lon
+tile38.topic.foo.expire=5
+```
+**Warning! This functionality only works when the Kafka topic name is equal to the Tile38 key.** 
 
 ### Tombstone messages
 
@@ -82,8 +90,9 @@ topics | Kafka topics read by the connector | comma-separated string | | high | 
 flush.timeout.ms | Used for periodic flushing | int | 10000 | low | 1234
 behavior.on.error | Error handling behavior | string | FAIL | medium | LOG or FAIL
 tile38.password | Tile38's password | string | "" | low | foo123
-tile38.topic.foo | Example command for 'foo' topic | string | | low | foo event.id FIELD route event.route POINT event.lat event.lon
-tile38.topic.bar | Example command for 'bar' topic | string | | low | anything event.the_key POINT event.latitude event.longitude
+tile38.topic.foo | Example command for 'foo' topic | string | | low | SET foo event.id FIELD route event.route POINT event.lat event.lon
+tile38.topic.foo.expire | Expire time for 'foo' keyed id's | int | | low | 5 
+tile38.topic.bar | Example command for 'bar' topic | string | | low | SET anything event.the_key POINT event.latitude event.longitude
 ***and*** | ***a*** | ***few*** | ***boring*** | ***connection*** | ***settings***
 socket.tcp.no.delay.enabled | Use TCP-no-delay | boolean | false | low |
 socket.keep.alive.enabled | Enable keepalive | boolean | false | low |
